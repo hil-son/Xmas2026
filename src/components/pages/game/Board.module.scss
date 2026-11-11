@@ -1,6 +1,6 @@
 .board {
   position: relative;
-  width: clamp(0px, calc(410.3 / 390 * 100vw), calc(410.3 / 390 * 600px));
+  width: clamp(0px, calc(451.33 / 390 * 100vw), calc(451.33 / 390 * 600px));
 }
 
 .boardPlate {
@@ -15,13 +15,13 @@
   position: absolute;
   display: flex;
   flex-direction: column;
-  left: clamp(0px, calc(29.998 / 390 * 100vw), calc(29.998 / 390 * 600px));
-  top: clamp(0px, calc(27.337 / 390 * 100vw), calc(27.337 / 390 * 600px));
-  gap: clamp(0px, calc(8.709 / 390 * 100vw), calc(8.709 / 390 * 600px));
+  left: clamp(0px, calc(32.998 / 390 * 100vw), calc(32.998 / 390 * 600px));
+  top: clamp(0px, calc(30.071 / 390 * 100vw), calc(30.071 / 390 * 600px));
+  gap: clamp(0px, calc(9.58 / 390 * 100vw), calc(9.58 / 390 * 600px));
 }
 
 .row {
   display: flex;
   flex-direction: row;
-  gap: clamp(0px, calc(8.709 / 390 * 100vw), calc(8.709 / 390 * 600px));
+  gap: clamp(0px, calc(9.58 / 390 * 100vw), calc(9.58 / 390 * 600px));
 }

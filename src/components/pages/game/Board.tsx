@@ -920,7 +920,7 @@ const Board: React.FC<BoardProps> = ({
   };
 
   // Tile holes measured on gameboard.png (848×920): 8×9 cells, 74px square, pitch 92.
-  const cellSize = (74 / 848) * 410.3;
+  const cellSize = (74 / 848) * 451.33;
   return (
     <div className={styles.board}>
       <img
