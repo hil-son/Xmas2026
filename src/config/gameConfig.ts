@@ -3,11 +3,8 @@
 // ==========================================
 // This file centralizes all game settings for easy adjustment
 
-// Keep asset URLs on the same prefix Next uses. Empty in dev and on Vercel.
-const basePath =
-  process.env.VERCEL || process.env.NODE_ENV !== "production"
-    ? ""
-    : "/3Care/eng/gamify/candy-crush";
+// Same prefix Next uses. Inlined for the browser via next.config.ts.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const gameConfig = {
   basePath,
