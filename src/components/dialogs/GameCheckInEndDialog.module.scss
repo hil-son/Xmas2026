@@ -1,0 +1,118 @@
+.root {
+  :global {
+    .MuiBackdrop-root {
+      background-color: #000000B2;
+      backdrop-filter: blur(16px);
+    }
+
+    .MuiDialog-container {
+      align-items: flex-start;
+    }
+
+    .MuiPaper-root {
+      margin: 0;
+      background-color: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      padding-top: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
+      padding-bottom: clamp(
+        0px,
+        calc(20 / 390 * 100vw),
+        calc(20 / 390 * 600px)
+      );
+      max-width: clamp(0px, calc(360 / 390 * 100vw), calc(360 / 390 * 600px));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: unset !important;
+      min-height: 100% !important;
+      overflow-x: hidden;
+    }
+  }
+}
+
+.checkInDayBox {
+  width: 100%;
+  margin-bottom: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
+}
+
+.button {
+  width: clamp(230px, calc(230 / 390 * 100vw), calc(230 / 390 * 600px));
+  
+  margin-top: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
+  margin-bottom: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
+
+  & + .button {
+    margin-top: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.titleText {
+  font-size: clamp(
+    0px,
+    calc(28 / 390 * 100vw),
+    calc(28 / 390 * 600px)
+  ) !important;
+  z-index: 2;
+  color: white;
+  font-weight: 700 !important;
+}
+
+.titleImage {
+  position: relative;
+  width: 105%;
+  left: -2.5%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contentContainer {
+  margin-top: clamp(calc(-30 / 390 * 600px), calc(-30 / 390 * 100vw), 0px);
+  padding: clamp(0px, calc(45 / 390 * 100vw), calc(45 / 390 * 600px))
+    clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px))
+    clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px))
+    clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px));
+  // border-radius: clamp(0px, calc(40 / 390 * 100vw), calc(40 / 390 * 600px));
+  border-radius: 40px;
+  background-image: url("/3Care/eng/gamify/candy-crush/images/instructions-bg.png"),linear-gradient(180deg, #FFD5A1 0%, #E5AA62 95.38%);
+  background-size: cover;
+}
+
+.titleText {
+  font-size: clamp(
+    0px,
+    calc(20 / 390 * 100vw),
+    calc(20 / 390 * 600px)
+  ) !important;
+  font-weight: bolder;
+  color: black;
+  margin-bottom: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
+}
+
+.contentText {
+  font-size: clamp(
+    0px,
+    calc(14 / 390 * 100vw),
+    calc(14 / 390 * 600px)
+  ) !important;
+  z-index: 2;
+  color: black;
+  width: 100%;
+}
+
+.contentOtherText {
+  font-size: clamp(
+    0px,
+    calc(14 / 390 * 100vw),
+    calc(14 / 390 * 600px)
+  ) !important;
+  z-index: 2;
+  color: #8A3B01;
+  width: 100%;
+}

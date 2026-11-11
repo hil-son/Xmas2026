@@ -1,0 +1,27 @@
+.board {
+  position: relative;
+  width: clamp(0px, calc(410.3 / 390 * 100vw), calc(410.3 / 390 * 600px));
+}
+
+.boardPlate {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.grid {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  left: clamp(0px, calc(29.998 / 390 * 100vw), calc(29.998 / 390 * 600px));
+  top: clamp(0px, calc(27.337 / 390 * 100vw), calc(27.337 / 390 * 600px));
+  gap: clamp(0px, calc(8.709 / 390 * 100vw), calc(8.709 / 390 * 600px));
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: clamp(0px, calc(8.709 / 390 * 100vw), calc(8.709 / 390 * 600px));
+}

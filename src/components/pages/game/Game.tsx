@@ -1,0 +1,719 @@
+import GameEndDialog from "@components/dialogs/GameEndDialog";
+import GamePauseDialog from "@components/dialogs/GamePauseDialog";
+import GameCheckInEndDialog from "@/components/dialogs/GameCheckInEndDialog";
+import { Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { formatNumberWithCommas } from "@utils/index";
+import useSound from "@hooks/useSound";
+import Board from "./Board";
+import styles from "./Game.module.scss";
+import AppImage from "@components/AppImage";
+import { gameConfig } from "@config/gameConfig";
+import { GameState } from "@/types/game";
+import { useRouter } from "next/navigation";
+import { saveProgress, todayStamp } from "@utils/localProgress";
+import { startGameSnow } from "./gameSnow";
+
+interface GameProps {
+  boardWidth: number;
+  boardHeight: number;
+  timeLimit: number;
+  timeBonusPerMatch: number;
+  gamePointBaseMinimumScore: number;
+  gamePointBase: number;
+  gamePointHighest: number;
+  bestScore: number;
+  continuousCheckinCount: number;
+  specialItemPoint: number;
+  tempSpecialItemPoint: number;
+  checkInToday: boolean;
+  items: string[];
+  pointsPerItem: number;
+  bonusPointsPerExtraMatch: number;
+  comboMultipliers: {
+    x2: number;
+    x3: number;
+    x4: number;
+    superCombo: number;
+  };
+  comboPopupImages: {
+    x2: string;
+    x3: string;
+    x4: string;
+    x5: string;
+  };
+  audioOn: boolean;
+  setAudioOn: (audioOn: boolean) => void;
+  setBestScore: (bestScore: number) => void;
+  onBackToMenu: () => void;
+  onCriticalTimeChange?: (isCritical: boolean) => void;
+  fetchUserInfoScore: () => void;
+  setSpecialItemPoint: (specialItemPoint: number) => void;
+  setContinuousCheckinCount?: (count: number) => void;
+  setCheckInToday?: (checkInToday: boolean) => void;
+  setTempSpecialItemPoint?: (count: number) => void;
+}
+
+const Game: React.FC<GameProps> = ({
+  boardWidth = 8,
+  boardHeight = 12,
+  timeLimit = gameConfig.time.limit,
+  timeBonusPerMatch = 1,
+  //gamePointBaseMinimumScore = 20,
+  //gamePointBase = 25,
+  //gamePointHighest = 50,
+  bestScore = 0,
+  continuousCheckinCount = 0,
+  specialItemPoint = 0,
+  tempSpecialItemPoint=0,
+  checkInToday = false,
+  items = [],
+  pointsPerItem = 10,
+  bonusPointsPerExtraMatch = 20,
+  comboMultipliers = { x2: 2, x3: 3, x4: 4, superCombo: 5 },
+  comboPopupImages = { x2: "", x3: "", x4: "", x5: "" },
+  audioOn,
+  setAudioOn,
+  setBestScore,
+  onBackToMenu,
+  onCriticalTimeChange,
+  fetchUserInfoScore,
+  setSpecialItemPoint,
+  setContinuousCheckinCount,
+  setCheckInToday,
+  setTempSpecialItemPoint,
+}) => {
+  const lastResumeTimeRef = useRef<number>(Date.now());
+  const accumulatedTimeRef = useRef<number>(0);
+  const bonusTimeRef = useRef<number>(0); // Track accumulated bonus time
+  const comboCountRef = useRef(0);
+  const highestComboRef = useRef(1); // Track highest combo in current chain
+  const [comboPopup, setComboPopup] = useState<string | null>(null);
+  const [comboPopupFading, setComboPopupFading] = useState(false);
+  const [gameKey, setGameKey] = useState(0); // Key to force board remount on restart
+  const [isCriticalTime, setIsCriticalTime] = useState(false); // Track if we're in critical time state for showing red bar glowing effect
+  const [gameState, setGameState] = useState<GameState>({
+    score: 0,
+    timeLeft: timeLimit * 1000, // in ms
+    isGameOver: false,
+    isPaused: false,
+    specialItemMatchNum: 0
+  });
+
+  const [openPauseDialog, setOpenPauseDialog] = useState(false);
+  const [openEndDialog, setOpenEndDialog] = useState(false);
+  const [openCheckInEndDialog, setOpenCheckInEndDialog] = useState(false);
+
+  const audioOnRef = useRef(audioOn);
+  const gameOverHandledRef = useRef(false);
+  const snowRef = useRef<HTMLCanvasElement>(null);
+
+  // Sound effects
+  const gameOverSound = useSound(gameConfig.sounds.effects.gameOver.path, {
+    volume: gameConfig.sounds.effects.gameOver.volume,
+  });
+  const pauseSound = useSound(gameConfig.sounds.effects.pause.path, {
+    volume: gameConfig.sounds.effects.pause.volume,
+  });
+  const comboX2Sound = useSound(gameConfig.sounds.combo.x2.path, {
+    volume: gameConfig.sounds.combo.x2.volume,
+  });
+  const comboX3Sound = useSound(gameConfig.sounds.combo.x3.path, {
+    volume: gameConfig.sounds.combo.x3.volume,
+  });
+  const comboX4Sound = useSound(gameConfig.sounds.combo.x4.path, {
+    volume: gameConfig.sounds.combo.x4.volume,
+  });
+  const comboSuperSound = useSound(gameConfig.sounds.combo.super.path, {
+    volume: gameConfig.sounds.combo.super.volume,
+  });
+
+  useEffect(() => {
+    audioOnRef.current = audioOn;
+  }, [audioOn]);
+
+  useEffect(() => {
+    const snow = snowRef.current;
+    if (!snow) return;
+    return startGameSnow(snow);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && !gameState.isPaused && !gameState.isGameOver) {
+        togglePause();
+      }
+    };
+
+    const handlePageHide = () => {
+      if (!gameState.isPaused && !gameState.isGameOver) {
+        togglePause();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+    };
+  }, [gameState.isPaused, gameState.isGameOver]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (!gameState.isGameOver && !gameState.isPaused) {
+      timer = setInterval(() => {
+        const now = Date.now();
+        const currentSessionTime = now - lastResumeTimeRef.current;
+        const totalElapsedTime = accumulatedTimeRef.current + currentSessionTime; // prettier-ignore
+        const newTimeLeft = Math.max(
+          0,
+          Math.min(
+            timeLimit * 1000,
+            timeLimit * 1000 - totalElapsedTime + bonusTimeRef.current
+          )
+        ); // Cap at original time limit
+        setGameState((prev: GameState) => ({
+          ...prev,
+          timeLeft: newTimeLeft,
+          isGameOver: newTimeLeft <= 0,
+        }));
+
+        const timePercentage = (newTimeLeft / (timeLimit * 1000)) * 100;
+        const newIsCriticalTime =
+          timePercentage <= gameConfig.time.barThresholds.red &&
+          timePercentage > 0 &&
+          !gameState.isGameOver;
+
+        setIsCriticalTime(newIsCriticalTime);
+      }, 10);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [gameState.isGameOver, gameState.isPaused, timeLimit]);
+
+  // Handle critical time change callback in useEffect to avoid setState during render
+  useEffect(() => {
+    onCriticalTimeChange?.(isCriticalTime);
+  }, [isCriticalTime, onCriticalTimeChange]);
+
+  useEffect(() => {
+    if (gameState.isGameOver) {
+      // Play game over sound
+      if (audioOnRef.current) {
+        gameOverSound.play();
+      }
+
+      // Check if current score beats the best score and update it
+      if (gameState.score > bestScore) {
+        setBestScore(gameState.score);
+      }
+    }
+  }, [
+    gameState.isGameOver,
+    gameState.score,
+    bestScore,
+    setBestScore,
+    gameOverSound
+  ]);
+
+  //handle when game is over
+  useEffect(() => {
+    if (!gameState.isGameOver || gameOverHandledRef.current) return;
+    gameOverHandledRef.current = true;
+
+    // Day-3 check-in pays 30 extra ingots. Apply it here so the reward
+    // still shows when the campaign API is unreachable.
+    const dayThreeBonus = !checkInToday && continuousCheckinCount >= 2 ? 30 : 0;
+    const ingotsEarned = gameState.specialItemMatchNum + dayThreeBonus;
+    const nextSpecialItemPoint = specialItemPoint + ingotsEarned;
+    const nextCheckins = checkInToday
+      ? continuousCheckinCount
+      : continuousCheckinCount + 1;
+
+    setSpecialItemPoint(nextSpecialItemPoint);
+    if (dayThreeBonus > 0) {
+      setGameState((prev: GameState) => ({
+        ...prev,
+        specialItemMatchNum: prev.specialItemMatchNum + dayThreeBonus,
+      }));
+    }
+    saveProgress({
+      bestScore: Math.max(bestScore, gameState.score),
+      continuousCheckinCount: nextCheckins,
+      specialItemPoint: nextSpecialItemPoint,
+      checkInDate: todayStamp(),
+    });
+
+    submitScore();
+
+    if (checkInToday) {
+      setOpenEndDialog(true);
+    } else {
+      setContinuousCheckinCount?.(nextCheckins);
+      setCheckInToday?.(true);
+      dailyCheckIn();
+      setOpenCheckInEndDialog(true);
+    }
+  }, [
+    gameState.isGameOver,
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Submit score to API when game ends
+  const submitScore = async () => {
+    try {
+      const response = await axios.post(
+        "/3Care/GamifyAcquirePoint.do",
+        {
+          campaignID: gameConfig.campaignID,
+          name: gameConfig.campaignName,
+          action: "game",
+          point: 0,
+          score: gameState.score,
+          specialItemMatchNum: gameState.specialItemMatchNum,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          }
+        }
+      );
+      if (response.data && response.data.code === 200) {
+        console.log("Score submitted successfully:", response.data);
+      }
+    } catch {
+      // Campaign API is only available on the host site. The score is already stored locally.
+    }
+  };
+
+  // Check In to API when game ends
+  const dailyCheckIn = async () => {
+    try {
+      const response = await axios.post(
+        "/3Care/GamifyDailyCheckin.do",
+        {
+          campaignID: gameConfig.campaignID,
+          name: gameConfig.campaignName,
+          action: "checkin",
+          lang: "eng",
+        },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          }
+        }
+      );
+      if (response.data && response.data.code === 200) {
+        console.log("Daily Check In submitted successfully:", response.data);
+      }
+    } catch {
+      // Check-in progress is already stored locally.
+    }
+  };
+
+  const handleMatchScore = (matchedCount: number) => {
+    const basePoints = matchedCount * pointsPerItem;
+
+    // Bonus points for matches larger than 3
+    const bonusPoints =
+      matchedCount > 3 ? (matchedCount - 3) * bonusPointsPerExtraMatch : 0;
+
+    // Calculate combo multiplier using current combo count
+    let comboMultiplier = 1;
+    const currentCombo = comboCountRef.current;
+    if (currentCombo >= 1) {
+      if (currentCombo === 1) comboMultiplier = comboMultipliers.x2;
+      else if (currentCombo === 2) comboMultiplier = comboMultipliers.x3;
+      else if (currentCombo === 3) comboMultiplier = comboMultipliers.x4;
+      else comboMultiplier = comboMultipliers.superCombo; // 5x or higher
+    }
+
+    // Track the highest combo achieved in this chain
+    if (comboMultiplier > highestComboRef.current) {
+      highestComboRef.current = comboMultiplier;
+    }
+
+    const totalPoints = (basePoints + bonusPoints) * comboMultiplier;
+
+    // Debug logging
+    console.log(
+      `Match ${
+        currentCombo + 1
+      }: ${matchedCount} items, combo x${comboMultiplier}, score: ${totalPoints}`
+    );
+
+    // Increment combo for next potential match
+    comboCountRef.current += 1;
+
+    // Add bonus time to the ref so it persists through timer updates
+    // Use timeBonusPerMatch as base unit multiplied by combo multiplier
+    bonusTimeRef.current += comboMultiplier * timeBonusPerMatch * 1000;
+
+    setGameState((prev: GameState) => ({
+      ...prev,
+      score: prev.score + totalPoints,
+      // timeLeft will be updated by the timer with bonus included
+    }));
+  };
+
+  const resetCombo = () => {
+    console.log("Combo reset");
+
+    // Show popup for the highest combo achieved (only if > 1)
+    if (highestComboRef.current > 1) {
+      let popupImage = "";
+      let sound = null;
+      if (highestComboRef.current === 2) {
+        popupImage = comboPopupImages.x2;
+        sound = comboX2Sound;
+      } else if (highestComboRef.current === 3) {
+        popupImage = comboPopupImages.x3;
+        sound = comboX3Sound;
+      } else if (highestComboRef.current === 4) {
+        popupImage = comboPopupImages.x4;
+        sound = comboX4Sound;
+      } else {
+        popupImage = comboPopupImages.x5;
+        sound = comboSuperSound;
+      }
+
+      if (audioOnRef.current && sound) {
+        sound.play();
+      }
+
+      console.log(`Showing combo popup for x${highestComboRef.current}`);
+      setComboPopup(popupImage);
+      setComboPopupFading(false);
+
+      // Start fade-out animation after 700ms
+      setTimeout(() => {
+        setComboPopupFading(true);
+      }, 700);
+
+      // Hide popup after fade-out animation completes (700ms + 500ms fade)
+      setTimeout(() => {
+        setComboPopup(null);
+        setComboPopupFading(false);
+      }, 1200);
+    }
+
+    // Reset both counters
+    comboCountRef.current = 0;
+    highestComboRef.current = 1;
+  };
+
+  const restartGame = () => {
+    const now = Date.now();
+    gameOverHandledRef.current = false;
+    lastResumeTimeRef.current = now;
+    accumulatedTimeRef.current = 0;
+    bonusTimeRef.current = 0; // Reset bonus time
+    comboCountRef.current = 0;
+    highestComboRef.current = 1;
+    fetchUserInfoScore(); // Fetch highest score from server
+    setComboPopup(null);
+    setComboPopupFading(false);
+    setIsCriticalTime(false); // Reset critical time state
+    onCriticalTimeChange?.(false); // Notify parent that critical time is over
+    setGameState({
+      score: 0,
+      timeLeft: timeLimit * 1000,
+      isGameOver: false,
+      isPaused: false,
+      specialItemMatchNum: 0
+    });
+
+    setOpenPauseDialog(false);
+    setOpenEndDialog(false);
+    setGameKey((prev) => prev + 1); // Increment key to force board remount and shuffle
+  };
+
+  const togglePause = () => {
+    setGameState((prev: GameState) => {
+      const now = Date.now();
+
+      if (prev.isPaused) {
+        // Resuming: reset the resume time to now
+        lastResumeTimeRef.current = now;
+      } else {
+        // Pausing: update accumulated time based on current timeLeft
+        // Calculate elapsed time considering both original time and bonus time
+        const totalAvailableTime = timeLimit * 1000 + bonusTimeRef.current;
+        const elapsedTime = totalAvailableTime - prev.timeLeft;
+        accumulatedTimeRef.current = elapsedTime;
+
+        // Play pause sound when pausing
+        if (audioOnRef.current) {
+          pauseSound.play();
+        }
+      }
+
+      return {
+        ...prev,
+        isPaused: !prev.isPaused,
+      };
+    });
+
+    setOpenPauseDialog(!openPauseDialog);
+  };
+
+  // Calculate game points based on score
+  //const calculateGamePoints = (score: number): number => {
+  //  if (score > bestScore) {
+  //    return gamePointHighest; // 50 points for beating best score
+  //  } else if (score >= gamePointBaseMinimumScore) {
+  //    return gamePointBase; // 25 points for reaching minimum score
+  //  } else {
+  //    return 0; // No points
+  //  }
+  //};
+
+  const timePercentage = (gameState.timeLeft / (timeLimit * 1000)) * 100;
+  const showBlueBar = false;
+  const showYellowBar = timePercentage >= gameConfig.time.barThresholds.yellow;
+  const showRedBar = timePercentage < gameConfig.time.barThresholds.red;
+
+  const router = useRouter();
+
+  const handleLeaderBoard = () => {
+    router.push("/leaderboard.jsp?req_d=my3");
+  };
+
+  const handleSpecialItemMatch = (count: number) => {
+    if (gameState.isGameOver) return;
+    
+    console.log(`Special item matched ${count} times`);
+    setGameState((prev: GameState) => ({
+      ...prev,
+      specialItemMatchNum: prev.specialItemMatchNum + count,
+      // timeLeft will be updated by the timer with bonus included
+    }));
+    setTempSpecialItemPoint?.(tempSpecialItemPoint + count);
+  };
+
+  const onNextEndDialog = () => {
+    setOpenCheckInEndDialog(false);
+    setOpenEndDialog(true);
+  };
+
+  return (
+    <div className={styles.root}>
+      <AppImage
+        src={gameConfig.assets.ui.gameBackground}
+        className={styles.backgroundImage}
+        alt="Game background"
+      />
+      <canvas className={styles.snow} ref={snowRef} aria-hidden="true" />
+
+      <div className={styles.gameContainer}>
+        <div className={styles.topBarContainer}>
+          <button
+            type="button"
+            className={styles.pauseButton}
+            onClick={togglePause}
+            aria-label="Pause"
+          >
+            <img src={gameConfig.assets.ui.pauseButton} alt="" />
+          </button>
+
+          <div className={styles.scoreGroup}>
+            <span className={styles.scoreLabel}>BEST</span>
+            <span className={styles.scoreValue}>
+              {formatNumberWithCommas(bestScore)}
+            </span>
+          </div>
+
+          <div className={`${styles.scoreGroup} ${styles.scoreGroupCurrent}`}>
+            <span className={styles.scoreLabel}>SCORE</span>
+            <span className={styles.scoreValue}>
+              {formatNumberWithCommas(gameState.score)}
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.boardWrapper}>
+          {/* {gameState.isGameOver ? (
+            <div className={styles.gameOver}>
+              <Typography variant="h4" gutterBottom>
+                Game Over!
+              </Typography>
+              <Typography variant="h5">
+                Final Score: {formatNumberWithCommas(gameState.score)}
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={restartGame}
+                size="large"
+                className={styles.playAgainButton}
+              >
+                Play Again
+              </Button>
+            </div>
+          ) : ( */}
+          <div
+            className={`${styles.boardContainer} ${
+              gameState.isPaused ? styles.pausedOverlay : ""
+            }`}
+          >
+            {gameState.isPaused && (
+              <Typography variant="h4" className={styles.pausedText}>
+                PAUSED
+              </Typography>
+            )}
+            <Board
+              width={boardWidth}
+              height={boardHeight}
+              audioOn={audioOn}
+              onMatch={gameState.isGameOver ? () => {} : handleMatchScore}
+              onResetCombo={gameState.isGameOver ? () => {} : resetCombo}
+              items={items}
+              disabled={gameState.isGameOver}
+              key={gameKey}
+              onSpecialItemMatch={gameState.isGameOver ? () => {} : handleSpecialItemMatch}
+            />
+
+            {/* Combo Popup */}
+            {comboPopup && !gameState.isGameOver && (
+              <div
+                className={`${styles.comboPopup} ${
+                  comboPopupFading ? styles.comboPopupFading : ""
+                }`}
+              >
+                <AppImage
+                  src={comboPopup}
+                  alt="Combo"
+                  className={styles.comboPopupImage}
+                />
+              </div>
+            )}
+          </div>
+          {/* )} */}
+        </div>
+
+        <div className={styles.timeBarContainer}>
+          <AppImage
+            src={gameConfig.assets.ui.timeBarBackground}
+            className={styles.timeBarBackgroundImage}
+            alt="Time bar background"
+          />
+
+          <div
+            className={styles.timeBarProgressContainer}
+            style={{
+              clipPath: `inset(0 ${
+                100 - (gameState.timeLeft / (timeLimit * 1000)) * 100
+              }% 0 0)`,
+            }}
+          >
+            {/* Invisible placeholder to maintain container height */}
+            <AppImage
+              src={gameConfig.assets.ui.timeBarBlue}
+              className={styles.timeBarProgressImage}
+              style={{ opacity: 0, visibility: "hidden" }}
+              alt=""
+            />
+
+            {/* Blue time bar - visible when > 50% */}
+            <AppImage
+              src={gameConfig.assets.ui.timeBarBlue}
+              className={`${styles.timeBarProgressImage} ${styles.timeBarBlue}`}
+              style={{
+                opacity: showBlueBar ? 1 : 0,
+              }}
+              alt="Blue time bar"
+            />
+
+            {/* Yellow time bar - visible when 20-50% */}
+            <AppImage
+              src={gameConfig.assets.ui.timeBarYellow}
+              className={`${styles.timeBarProgressImage} ${styles.timeBarYellow}`}
+              style={{
+                opacity: showYellowBar ? 1 : 0,
+              }}
+              alt="Yellow time bar"
+            />
+
+            {/* Red time bar - visible when < 20% */}
+            <AppImage
+              src={gameConfig.assets.ui.timeBarRed}
+              className={`${styles.timeBarProgressImage} ${styles.timeBarRed} ${
+                showRedBar && isCriticalTime ? styles.timeBarFlashing : ""
+              }`}
+              style={{
+                opacity: showRedBar ? 1 : 0,
+              }}
+              alt="Red time bar"
+            />
+          </div>
+        </div>
+
+        <div className={styles.gameBottomGiftNumBar}>
+          <AppImage
+            src={gameConfig.assets.ui.gameBottomGiftNumBar}
+            className={styles.gameBottomGiftNumBarImage}
+            alt="Your Gift Box"
+          />
+
+          <div className={styles.gameGiftNumberContainer}>
+            <Typography className={styles.giftNumText}>
+              {formatNumberWithCommas(tempSpecialItemPoint)}
+            </Typography>
+          </div>
+        </div>
+      </div>
+
+      <GamePauseDialog
+        open={openPauseDialog}
+        audioOn={audioOn}
+        setAudioOn={setAudioOn}
+        onResumeGame={togglePause}
+        onRestartGame={restartGame}
+        onBackToMenu={onBackToMenu}
+      />
+
+      <GameCheckInEndDialog
+        open={openCheckInEndDialog}
+        continuousCheckinCount={continuousCheckinCount}
+        onNextEndDialog={onNextEndDialog}
+      />
+
+      <GameEndDialog
+        open={openEndDialog}
+        audioOn={audioOn}
+        score={gameState.score}
+        specialItemMatchNum={gameState.specialItemMatchNum}
+        specialItemTotalNum={specialItemPoint}
+        bestScore={bestScore}
+        // gamePoint={calculateGamePoints(gameState.score)}
+        gamePoint={0}
+        onBackToMenu={onBackToMenu}
+        setAudioOn={setAudioOn}
+        onRestartGame={restartGame}
+        onLeaderboard={handleLeaderBoard}
+      />
+
+      {/* Preload combo popup images - invisible placeholders for caching */}
+      <div
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <AppImage src={comboPopupImages.x2} alt="" />
+        <AppImage src={comboPopupImages.x3} alt="" />
+        <AppImage src={comboPopupImages.x4} alt="" />
+        <AppImage src={comboPopupImages.x5} alt="" />
+      </div>
+    </div>
+  );
+};
+
+export default Game;

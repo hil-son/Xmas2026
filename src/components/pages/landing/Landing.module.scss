@@ -1,0 +1,335 @@
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #140c0a;
+}
+
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+  overflow: hidden;
+  background: #1a100c;
+}
+
+.plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.lights,
+.snow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.snow {
+  z-index: 8;
+}
+
+.globeSnow {
+  position: absolute;
+  left: 52px;
+  top: 124px;
+  width: 292px;
+  height: 292px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.pugLive {
+  position: absolute;
+  left: 192px;
+  top: 240px;
+  width: 107px;
+  height: 127px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.lights {
+  z-index: 2;
+}
+
+.bulb {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--halo);
+    height: var(--halo);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 236, 196, 0.95) 0%,
+      rgba(255, 176, 70, 0.55) 28%,
+      rgba(255, 140, 40, 0.18) 52%,
+      transparent 72%
+    );
+    mix-blend-mode: screen;
+    animation: flicker var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  38% {
+    opacity: 0.78;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+  62% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  82% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+}
+
+.shinePlaque {
+  position: absolute;
+  left: 88px;
+  top: 446px;
+  width: 218px;
+  height: 84px;
+  overflow: hidden;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 3;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: -30%;
+    bottom: -30%;
+    width: 42%;
+    left: -50%;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0) 30%,
+      rgba(255, 248, 220, 0.85) 50%,
+      rgba(255, 255, 255, 0) 70%,
+      transparent 100%
+    );
+    animation: gleam 5.6s ease-in-out infinite;
+  }
+}
+
+@keyframes gleam {
+  0%,
+  58% {
+    transform: translateX(0);
+  }
+  82%,
+  100% {
+    transform: translateX(380%);
+  }
+}
+
+.prizeCard,
+.giftCard,
+.playButton {
+  position: absolute;
+  left: 18px;
+  width: 357px;
+  z-index: 10;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.prizeCard {
+  top: 598px;
+  height: 63px;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.giftCard {
+  top: 672px;
+  height: 92px;
+}
+
+.giftArt {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.score {
+  position: absolute;
+  left: 32.8%;
+  top: 55.2%;
+  color: #fff;
+  font-family: var(--font-allround-gothic), "Noto Sans TC", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.stamp {
+  position: absolute;
+  top: 33.7%;
+  width: 10.2%;
+  height: auto;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.stamp1 { left: 49.56%; }
+.stamp2 { left: 63.83%; }
+.stamp3 { left: 78.1%; }
+
+.playButton {
+  top: 776px;
+  height: auto;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.bulbRim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  i {
+    position: absolute;
+    width: 2.2%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.55);
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 244, 190, 0.28) 42%,
+      rgba(255, 214, 110, 0) 72%
+    );
+    box-shadow: 0 0 4px 1px rgba(255, 230, 150, 0.35);
+    mix-blend-mode: screen;
+    animation: bulbShine 7.5s ease-in-out infinite;
+  }
+}
+
+@keyframes bulbShine {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+  50% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+.fxToggles {
+  display: none;
+  position: absolute;
+  top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  left: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  z-index: 20;
+  align-items: flex-start;
+  gap: clamp(8px, calc(8 / 390 * 100vw), calc(8 / 390 * 600px));
+}
+
+.fxCol {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, calc(8 / 390 * 100vw), calc(8 / 390 * 600px));
+}
+
+.fxBtn {
+  width: clamp(36px, calc(36 / 390 * 100vw), calc(36 / 390 * 600px));
+  height: clamp(36px, calc(36 / 390 * 100vw), calc(36 / 390 * 600px));
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(28, 16, 10, 0.42);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+
+  svg {
+    width: 50%;
+    height: 50%;
+    display: block;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.fxOn {
+  background: rgba(255, 214, 120, 0.94);
+  color: #5c3d12;
+  border-color: rgba(255, 246, 214, 0.95);
+}
+
+.audioControlButton {
+  position: absolute;
+  top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  right: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  width: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  height: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  cursor: pointer;
+  z-index: 20;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
