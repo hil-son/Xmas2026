@@ -1,14 +1,18 @@
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@mui/material";
 import AppImage from "@components/AppImage";
 import styles from "./GameInstructionsDialog.module.scss";
 import { gameConfig } from "@config/gameConfig";
 import Typography from "@mui/material/Typography";
 import { Swiper, SwiperSlide } from 'swiper/react';
+import type { Swiper as SwiperType } from "swiper";
 
 import 'swiper/css';
 import 'swiper/css/pagination';
 
 import { Pagination } from 'swiper/modules';
+
+const STEP_COUNT = 3;
 
 interface GameInstructionsDialogProps {
   open: boolean;
@@ -21,18 +25,45 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
   onPlay,
   onClose,
 }) => {
-  const handleClose = () => {
-    // if (dontShowAgain) {
-    //   localStorage.setItem("candyCrush_hideInstructions", "true");
-    // }
-    onClose();
+  const swiperRef = useRef<SwiperType | null>(null);
+  const [step, setStep] = useState(0);
+  const [seen, setSeen] = useState<boolean[]>(() => Array(STEP_COUNT).fill(false).map((_, index) => index === 0));
+
+  useEffect(() => {
+    if (!open) return;
+    setStep(0);
+    setSeen(Array(STEP_COUNT).fill(false).map((_, index) => index === 0));
+    swiperRef.current?.slideTo(0, 0);
+  }, [open]);
+
+  const markSeen = (index: number) => {
+    setStep(index);
+    setSeen((current) => {
+      if (current[index]) return current;
+      const next = [...current];
+      next[index] = true;
+      return next;
+    });
+  };
+
+  const showPlay = seen.every(Boolean) && step === STEP_COUNT - 1;
+
+  const onNext = () => {
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+    if (seen.every(Boolean)) {
+      swiper.slideTo(STEP_COUNT - 1);
+      return;
+    }
+    const upcoming = seen.findIndex((value, index) => !value && index > step);
+    const anyUnseen = seen.findIndex((value) => !value);
+    swiper.slideTo(upcoming >= 0 ? upcoming : anyUnseen);
   };
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
-      onClick={handleClose}
+      onClose={onClose}
       className={styles.root}
     >
       <DialogContent>
@@ -46,6 +77,11 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
           modules={[Pagination]}
           className="instructionSwiper"
           observeParents={true}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+            swiper.slideTo(0, 0);
+          }}
+          onSlideChange={(swiper) => markSeen(swiper.activeIndex)}
         >
           <SwiperSlide data-hash="slide1">
             <AppImage
@@ -63,7 +99,7 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               </div>
 
               <Typography align="center" className={styles.titleText}>
-                CNY Special
+                Xmas Special
               </Typography>
 
               <AppImage
@@ -73,7 +109,7 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               />
 
               <Typography align="center" className={styles.contentText}>
-                Special CNY Gift boxes will appear randomly. Grab the most Gift boxes will win exclusive rewards!
+                Special Xmas Gift boxes will appear randomly. Grab the most Gift boxes will win exclusive rewards!
               </Typography>
             </div>
           </SwiperSlide>
@@ -143,12 +179,21 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
           
         </Swiper>
         <div className={styles.instructionSwiperPagination}></div>
-        <button type="button" className={styles.playNowButton} onClick={onPlay}>
-          <AppImage
-            src={gameConfig.assets.ui.playNowButton}
-            alt="Play now button"
-          />
-        </button>
+        {showPlay ? (
+          <button type="button" className={styles.playNowButton} onClick={onPlay}>
+            <AppImage
+              src={gameConfig.assets.ui.playNowButton}
+              alt="Play now button"
+            />
+          </button>
+        ) : (
+          <button type="button" className={styles.nextButton} onClick={onNext}>
+            <AppImage
+              src={gameConfig.assets.ui.nextButton}
+              alt="Next"
+            />
+          </button>
+        )}
         
       </DialogContent>
 

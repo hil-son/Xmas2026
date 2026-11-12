@@ -1,4 +1,5 @@
 const STORAGE_KEY = "cny-candy-crush-progress";
+const HOW_TO_PLAY_KEY = "cny-candy-crush-seen-howto";
 
 export interface LocalProgress {
   bestScore: number;
@@ -46,4 +47,22 @@ export const saveProgress = (progress: LocalProgress) => {
 
 export const isCheckedInToday = (progress: LocalProgress): boolean => {
   return progress.checkInDate === todayStamp();
+};
+
+export const hasPlayedBefore = (): boolean => {
+  if (typeof window === "undefined") return true;
+  if (window.localStorage.getItem(HOW_TO_PLAY_KEY) === "1") return true;
+
+  const progress = loadProgress();
+  return (
+    progress.bestScore > 0 ||
+    progress.continuousCheckinCount > 0 ||
+    progress.specialItemPoint > 0 ||
+    progress.checkInDate !== null
+  );
+};
+
+export const markHowToPlaySeen = () => {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(HOW_TO_PLAY_KEY, "1");
 };

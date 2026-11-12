@@ -168,6 +168,7 @@ export const gameConfig = {
       audioOnButton: `${basePath}/images/audio-on-button.png`,
       audioOffButton: `${basePath}/images/audio-off-button.png`,
       playNowButton: `${basePath}/images/play-now-button.png?v=green`,
+      nextButton: `${basePath}/images/next-button.png?v=lantern`,
       menuButton: `${basePath}/images/menu-button.png`,
       resumeGameButton: `${basePath}/images/resume-game-button.png?v=lights`,
       restartGameButton: `${basePath}/images/restart-game-button.png?v=lights`,

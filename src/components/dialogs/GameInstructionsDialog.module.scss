@@ -35,8 +35,8 @@
     clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px));
   // border-radius: clamp(0px, calc(40 / 390 * 100vw), calc(40 / 390 * 600px));
   border-radius: 40px;
-  background-image: linear-gradient(180deg, #FFD5A1 0%, #E5AA62 95.38%);
-  background-size: cover;
+  background: #123f35;
+  color: #fff;
   min-height: clamp(300px, calc(300 / 390 * 100vw), calc(300 / 390 * 600px))
 }
 
@@ -55,10 +55,11 @@
     calc(16 / 390 * 100vw),
     calc(16 / 390 * 600px)
   ) !important;
+  color: #fff !important;
 }
 
 .brownText {
-  color: #8A3B01;
+  color: #cea272 !important;
 }
 
 .playButton {
@@ -93,6 +94,7 @@
     calc(20 / 390 * 600px)
   ) !important;
   font-weight: 700 !important;
+  color: #fff !important;
 }
 
 .instructionsGiftNumSample {
@@ -116,15 +118,25 @@
   border-radius: 20px;
 }
 
-.playNowButton {
-  width: clamp(230px, calc(230 / 390 * 100vw), calc(230 / 390 * 600px));
+.playNowButton,
+.nextButton {
   position: relative;
   left: 50%;
   transform: translateX(-50%);
   margin-top: 0.5em;
+  cursor: pointer;
 
   img {
     width: 100%;
     height: auto;
+    display: block;
   }
+}
+
+.nextButton {
+  width: clamp(230px, calc(230 / 390 * 100vw), calc(230 / 390 * 600px));
+}
+
+.playNowButton {
+  width: clamp(calc(230px * 1.3), calc(230 / 390 * 1.3 * 100vw), calc(230 / 390 * 1.3 * 600px));
 }

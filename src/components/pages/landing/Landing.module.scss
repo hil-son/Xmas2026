@@ -347,8 +347,11 @@
 
 .playButton {
   top: 754px;
+  left: calc((393px - 357px * 1.1) / 2);
+  width: calc(357px * 1.1);
   height: auto;
   cursor: pointer;
+  transform-origin: center center;
 
   img {
     width: 100%;
@@ -362,7 +365,32 @@
   }
 
   &:active {
-    transform: translateY(1px);
+    filter: brightness(0.96);
+  }
+}
+
+.swinging {
+  animation: playSwing var(--swing-duration, 1440ms) cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes playSwing {
+  0% {
+    transform: rotate(0deg);
+  }
+  16% {
+    transform: rotate(var(--swing, 4.5deg)) translateY(-2px);
+  }
+  34% {
+    transform: rotate(calc(var(--swing, 4.5deg) * -0.78)) translateY(1px);
+  }
+  52% {
+    transform: rotate(calc(var(--swing, 4.5deg) * 0.46));
+  }
+  70% {
+    transform: rotate(calc(var(--swing, 4.5deg) * -0.2));
+  }
+  100% {
+    transform: rotate(0deg);
   }
 }
 

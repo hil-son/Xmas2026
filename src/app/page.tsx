@@ -9,8 +9,10 @@ import GameInstructionsDialog from "@components/dialogs/GameInstructionsDialog";
 import { gameConfig } from "@config/gameConfig";
 import { useRouter } from "next/navigation";
 import {
+  hasPlayedBefore,
   isCheckedInToday,
   loadProgress,
+  markHowToPlaySeen,
   saveProgress,
   todayStamp,
   type LocalProgress,
@@ -454,12 +456,17 @@ export default function Home() {
   });
 
   const handlePlay = () => {
+    if (!hasPlayedBefore()) {
+      setOpenInstructionsDialog(true);
+      return;
+    }
     setPage("game");
   };
 
   const handlePlayFromTutorial = () => {
-    setPage("game");
+    markHowToPlaySeen();
     setOpenInstructionsDialog(false);
+    setPage("game");
   };
 
   const handleBackToMenu = () => {

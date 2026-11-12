@@ -98,6 +98,7 @@ const Landing: React.FC<LandingProps> = ({
   const pugRef = useRef<HTMLCanvasElement>(null);
   const [scale, setScale] = useState(1);
   const [prizeOpen, setPrizeOpen] = useState(false);
+  const playRef = useRef<HTMLButtonElement>(null);
   const fxRef = useRef<CoverFx>({
     snow: true,
     pump: true,
@@ -142,6 +143,37 @@ const Landing: React.FC<LandingProps> = ({
       coverImageUrl: coverSrc,
       fx: fxRef.current,
     });
+  }, []);
+
+  useEffect(() => {
+    const button = playRef.current;
+    if (!button) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let cancelled = false;
+    let timer = 0;
+
+    const burst = () => {
+      if (cancelled) return;
+      const angle = (3.5 + Math.random() * 3) * (Math.random() < 0.5 ? -1 : 1);
+      const duration = 1240 + Math.random() * 760;
+      button.style.setProperty("--swing", `${angle}deg`);
+      button.style.setProperty("--swing-duration", `${duration}ms`);
+      button.classList.remove(styles.swinging);
+      void button.offsetWidth;
+      button.classList.add(styles.swinging);
+
+      const againSoon = Math.random() < 0.45;
+      const wait = duration + (againSoon ? 180 : 650 + Math.random() * 1700);
+      timer = window.setTimeout(burst, wait);
+    };
+
+    timer = window.setTimeout(burst, 360 + Math.random() * 700);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      button.classList.remove(styles.swinging);
+    };
   }, []);
 
   const toggleFx = (key: FxKey) => {
@@ -217,7 +249,7 @@ const Landing: React.FC<LandingProps> = ({
             ))}
           </div>
         </div>
-        <button type="button" className={styles.playButton} onClick={onPlay} aria-label="Play">
+        <button ref={playRef} type="button" className={styles.playButton} onClick={onPlay} aria-label="Play">
           <img src={playSrc} alt="" />
         </button>
       </div>
