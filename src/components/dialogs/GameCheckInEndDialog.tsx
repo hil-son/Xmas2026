@@ -50,17 +50,20 @@ const GameEndDialog: React.FC<GameCheckInEndDialogProps> = ({
           Daily Check-in Bonus
         </Typography>
         
-        <Typography align="center" className={styles.contentText}>
+        <Typography
+          align="center"
+          className={continuousCheckinCount >= 3 ? styles.contentOtherText : styles.contentText}
+        >
           { continuousCheckinCount === 1
             ? "2 more check-ins to earn"
             : continuousCheckinCount === 2
               ? "1 more check-in to earn"
-              : "30 extra Gold Ingots earned! Enjoy!" }
+              : "30 extra Gift boxes earned! Enjoy!" }
         </Typography>
 
         <Typography align="center" className={styles.contentOtherText}>
           { continuousCheckinCount === 1 || continuousCheckinCount === 2
-            ? "30 extra Gold Ingots." : "" }
+            ? "30 extra Gift boxes." : "" }
         </Typography>
       </div>
 

@@ -97,7 +97,7 @@ const PrizeDetailsDialog: React.FC<PrizeDetailsDialogProps> = ({ open, onClose }
                   Christmas Crush for a chance to win a Park&apos;n Shop voucher during the holiday
                   campaign. Play from the first of December through the eighteenth and collect gift
                   boxes as you match items on the board. Check in for three days in a row to earn
-                  thirty extra Gold Ingots on the third day. Voucher winners are drawn after the
+                  thirty extra Gift boxes on the third day. Voucher winners are drawn after the
                   campaign ends. Please replace this placeholder with the final prize terms, dates,
                   and eligibility notes before the event launches for players across the holiday
                   season today.

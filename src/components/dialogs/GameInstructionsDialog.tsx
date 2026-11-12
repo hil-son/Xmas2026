@@ -73,7 +73,7 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               />
 
               <Typography align="center" className={styles.contentText}>
-                Special CNY Gold Ingots will appear randomly. Grab the most Gold Ingots will win exclusive rewards!
+                Special CNY Gift boxes will appear randomly. Grab the most Gift boxes will win exclusive rewards!
               </Typography>
             </div>
           </SwiperSlide>
@@ -99,7 +99,7 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
 
               <Typography align="center" className={styles.contentText}>
                 Check in for 3 consecutive days to receive 
-                <span className={styles.brownText}> 30 extra Gold Ingots.</span>
+                <span className={styles.brownText}> 30 extra Gift boxes.</span>
               </Typography>
             </div>
           </SwiperSlide>

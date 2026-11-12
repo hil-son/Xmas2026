@@ -38,8 +38,7 @@
 }
 
 .button {
-  width: clamp(230px, calc(230 / 390 * 100vw), calc(230 / 390 * 600px));
-  
+  width: 105%;
   margin-top: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
   margin-bottom: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
 
@@ -78,10 +77,8 @@
     clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px))
     clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px))
     clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px));
-  // border-radius: clamp(0px, calc(40 / 390 * 100vw), calc(40 / 390 * 600px));
   border-radius: 40px;
-  background-image: url("/images/instructions-bg.png?v=art"),linear-gradient(180deg, #FFD5A1 0%, #E5AA62 95.38%);
-  background-size: cover;
+  background: transparent;
 }
 
 .titleText {
@@ -91,7 +88,7 @@
     calc(20 / 390 * 600px)
   ) !important;
   font-weight: bolder;
-  color: black;
+  color: #fff;
   margin-bottom: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
 }
 
@@ -102,7 +99,7 @@
     calc(14 / 390 * 600px)
   ) !important;
   z-index: 2;
-  color: black;
+  color: #fff;
   width: 100%;
 }
 
@@ -113,6 +110,6 @@
     calc(14 / 390 * 600px)
   ) !important;
   z-index: 2;
-  color: #8A3B01;
+  color: #cea272;
   width: 100%;
 }
