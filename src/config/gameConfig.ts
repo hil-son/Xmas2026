@@ -159,35 +159,20 @@ export const gameConfig = {
       // Game screen
       gameBackground: `${basePath}/images/game-background.png?v=xmas`,
       gameBoard: `${basePath}/images/gameboard.png`,
-      topBar: `${basePath}/images/game-top-bar.png`,
       timeBarBackground: `${basePath}/images/time-bar-bg.png?v=xmas`,
       timeBarBlue: `${basePath}/images/time-bar-blue.png`,
       timeBarYellow: `${basePath}/images/time-bar-yellow.png`,
       timeBarRed: `${basePath}/images/time-bar-red.png`,
 
-      // Landing screen
-      landingBackground: `${basePath}/images/landing-bg.png`,
-      landingTitle: `${basePath}/images/landing-title.png`,
-      landingEventDetails: `${basePath}/images/landing-event-details.png`,
-      landingUserGameInfoBox: {
-        day0:  `${basePath}/images/landing-user-game-info-box-day-0.png`,
-        day1:  `${basePath}/images/landing-user-game-info-box-day-1.png`,
-        day2:  `${basePath}/images/landing-user-game-info-box-day-2.png`,
-        day3:  `${basePath}/images/landing-user-game-info-box-day-3.png`,
-      },
-
       // Buttons
       audioOnButton: `${basePath}/images/audio-on-button.png`,
       audioOffButton: `${basePath}/images/audio-off-button.png`,
-      playButton: `${basePath}/images/play-button.png`,
-      playNowButton: `${basePath}/images/play-now-button.png`,
-      instructionsButton: `${basePath}/images/instructions-button.png`,
+      playNowButton: `${basePath}/images/play-now-button.png?v=green`,
       menuButton: `${basePath}/images/menu-button.png`,
       resumeGameButton: `${basePath}/images/resume-game-button.png?v=lights`,
       restartGameButton: `${basePath}/images/restart-game-button.png?v=lights`,
       backToMenuButton: `${basePath}/images/back-to-menu-button.png?v=lights`,
-      okButton: `${basePath}/images/ok-button.png`,
-      pauseButton: `${basePath}/images/pause-button.png?v=glow`,
+      okButton: `${basePath}/images/ok-button.png?v=green`,
 
       // Dialog titles
       gamePausedTitle: `${basePath}/images/game-paused-title.png?v=xmas`,
@@ -197,13 +182,13 @@ export const gameConfig = {
       itemHighlightBorder: `${basePath}/images/item-highlight-border.png`,
       itemHighlightStar: `${basePath}/images/item-highlight-star.png`,
       instructionsAnimation: `${basePath}/images/instructions-animation.gif`,
-      instructionsTimeBar: `${basePath}/images/instructions-time-bar.png`,
-      instructionsGiftNumSample: `${basePath}/images/instructions-gift-num-sample.png`,
+      instructionsTimeBar: `${basePath}/images/instructions-time-bar.png?v=art`,
+      instructionsGiftNumSample: `${basePath}/images/instructions-gift-num-sample.png?v=art`,
       
       checkInDialogCheckInBox: {
-        day1:  `${basePath}/images/check-in-box-day-1.png`,
-        day2:  `${basePath}/images/check-in-box-day-2.png`,
-        day3:  `${basePath}/images/check-in-box-day-3.png`,
+        day1:  `${basePath}/images/check-in-box-day-1.png?v=art`,
+        day2:  `${basePath}/images/check-in-box-day-2.png?v=art`,
+        day3:  `${basePath}/images/check-in-box-day-3.png?v=art`,
       },
 
       checkInDialogCheckInTopBanner: {
@@ -214,11 +199,9 @@ export const gameConfig = {
 
       giftBoxIcon: `${basePath}/images/xmas-giftbox.png`,
 
-      gameBottomGiftNumBar: `${basePath}/images/game-gift-box-bar.png`,
+      gameBottomGiftNumBar: `${basePath}/images/game-gift-box-bar.png?v=art`,
 
-      endDialogGiftBoxBg: `${basePath}/images/end-dialog-gift-box-bg.png`,
-
-      landingBackgroundBottom: `${basePath}/images/game-bg-bottom.png`,
+      endDialogGiftBoxBg: `${basePath}/images/end-dialog-gift-box-bg.png?v=frame`,
     },
   },
 };

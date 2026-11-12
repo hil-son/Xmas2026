@@ -14,6 +14,26 @@ import { GameState } from "@/types/game";
 import { useRouter } from "next/navigation";
 import { saveProgress, todayStamp } from "@utils/localProgress";
 import { startGameSnow } from "./gameSnow";
+import { Abhaya_Libre, Montserrat_Alternates } from "next/font/google";
+
+const scoreLabelFont = Abhaya_Libre({
+  weight: "800",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const scoreValueFont = Montserrat_Alternates({
+  weight: "700",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const topFlakes = "ababababadededededadededededededed";
+const bottomFlakes = "abadededededadededededededed";
+
+function flakeSrc(key: string) {
+  return `${gameConfig.basePath}/images/topbar/flake-${key}.svg`;
+}
 
 interface GameProps {
   boardWidth: number;
@@ -511,29 +531,54 @@ const Game: React.FC<GameProps> = ({
       <canvas className={styles.snow} ref={snowRef} aria-hidden="true" />
 
       <div className={styles.gameContainer}>
-        <div className={styles.topBarContainer}>
+        <div className={styles.topBar}>
+          <div className={styles.flakeRowTop}>
+            {[...topFlakes].map((key, index) => (
+              <img key={index} src={flakeSrc(key)} alt="" />
+            ))}
+          </div>
+
           <button
             type="button"
             className={styles.pauseButton}
             onClick={togglePause}
             aria-label="Pause"
           >
-            <img src={gameConfig.assets.ui.pauseButton} alt="" />
+            <span className={styles.pauseBase}><img src={`${gameConfig.basePath}/images/topbar/pause-base.svg`} alt="" /></span>
+            <span className={styles.pauseInner}><img src={`${gameConfig.basePath}/images/topbar/pause-inner.svg`} alt="" /></span>
+            <span className={styles.pauseGlow}><img src={`${gameConfig.basePath}/images/topbar/pause-glow.svg`} alt="" /></span>
+            <span className={styles.pauseShine}><img src={`${gameConfig.basePath}/images/topbar/pause-shine.svg`} alt="" /></span>
+            <span className={styles.pauseGlint}><img src={`${gameConfig.basePath}/images/topbar/pause-glint.svg`} alt="" /></span>
+            <i className={styles.pauseBar} aria-hidden="true" />
+            <i className={`${styles.pauseBar} ${styles.pauseBarRight}`} aria-hidden="true" />
           </button>
 
-          <div className={styles.scoreGroup}>
-            <span className={styles.scoreLabel}>BEST</span>
-            <span className={styles.scoreValue}>
+          <div className={styles.scoreGroupBest}>
+            <span className={`${styles.scoreLabel} ${scoreLabelFont.className}`}>BEST</span>
+            <span className={`${styles.scorePill} ${scoreValueFont.className}`}>
               {formatNumberWithCommas(bestScore)}
             </span>
           </div>
 
-          <div className={`${styles.scoreGroup} ${styles.scoreGroupCurrent}`}>
-            <span className={styles.scoreLabel}>SCORE</span>
-            <span className={styles.scoreValue}>
+          <div className={styles.scoreGroupCurrent}>
+            <span className={`${styles.scoreLabel} ${scoreLabelFont.className}`}>SCORE</span>
+            <span className={`${styles.scorePill} ${scoreValueFont.className}`}>
               {formatNumberWithCommas(gameState.score)}
             </span>
           </div>
+
+          <div className={styles.flakeRowBottom}>
+            {[...bottomFlakes].map((key, index) => (
+              <img key={index} src={flakeSrc(key)} alt="" />
+            ))}
+          </div>
+
+          <span className={styles.caneLeft}>
+            <img src={`${gameConfig.basePath}/images/topbar/deco-left.png`} alt="" />
+          </span>
+          <span className={styles.caneRight}>
+            <img src={`${gameConfig.basePath}/images/topbar/deco-right.png`} alt="" />
+          </span>
         </div>
 
         <div className={styles.boardWrapper}>

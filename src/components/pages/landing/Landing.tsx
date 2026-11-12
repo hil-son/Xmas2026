@@ -1,5 +1,6 @@
 import AppImage from "@components/AppImage";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Abhaya_Libre, Montserrat_Alternates } from "next/font/google";
 import { gameConfig } from "@config/gameConfig";
 import { formatNumberWithCommas } from "@utils/index";
 import styles from "./Landing.module.scss";
@@ -17,30 +18,17 @@ interface LandingProps {
   onEventDetails: () => void;
 }
 
+const labelFont = Abhaya_Libre({ weight: "800", subsets: ["latin"], display: "swap" });
+const valueFont = Montserrat_Alternates({ weight: "700", subsets: ["latin"], display: "swap" });
+
 const coverSrc = `${gameConfig.basePath}/images/cover.png`;
 const pugSrc = `${gameConfig.basePath}/images/pug.png`;
 const playSrc = `${gameConfig.basePath}/images/cover-play.png?v=lights`;
-
-// White bulb centers on cover-play.png, walked around the rim.
-const PLAY_BULBS: Array<[number, number]> = [
-  [1.7, 32.5], [4.1, 14.0], [9.8, 4.4], [13.7, 7.0], [17.7, 7.0], [21.7, 7.0],
-  [25.6, 7.0], [29.6, 7.9], [33.6, 7.9], [37.5, 8.8], [41.4, 9.7], [45.2, 10.5],
-  [48.6, 12.3], [52.0, 12.3], [55.5, 10.5], [59.4, 9.7], [63.2, 8.8], [67.1, 7.9],
-  [71.1, 7.9], [75.1, 7.0], [79.0, 7.0], [83.0, 7.0], [87.0, 5.3], [90.9, 4.4],
-  [94.8, 10.5], [97.7, 26.3], [98.9, 49.1], [97.7, 71.9], [94.9, 87.7], [91.1, 93.9],
-  [87.0, 93.9], [83.1, 93.9], [79.2, 91.2], [75.2, 91.2], [71.3, 91.2], [67.3, 90.4],
-  [63.3, 90.4], [59.5, 89.5], [55.7, 87.7], [52.1, 86.8], [48.7, 86.0], [45.2, 87.7],
-  [41.5, 88.6], [37.7, 89.5], [33.7, 90.4], [29.8, 91.2], [25.8, 91.2], [21.8, 91.2],
-  [17.9, 93.9], [14.0, 93.9], [10.1, 93.9], [6.1, 90.4], [2.8, 77.2], [1.1, 56.1],
-];
-
-const SHINING_BULBS = PLAY_BULBS
-  .map((bulb, index) => ({ bulb, index, rank: Math.abs(Math.sin(index * 91.7)) }))
-  .sort((a, b) => a.rank - b.rank)
-  .slice(0, Math.round(PLAY_BULBS.length / 2));
 const prizeSrc = `${gameConfig.basePath}/images/cover-prize.png`;
-const giftSrc = `${gameConfig.basePath}/images/cover-gift.png`;
-const checkedStampSrc = `${gameConfig.basePath}/images/cover-gift-checked.png`;
+const cardBase = `${gameConfig.basePath}/images/covercard`;
+
+const cardFlakes = [2, 3, 2, 4, 2, 4, 2, 4, 2, 5, 6, 5, 6, 5, 6, 5, 6, 5, 2, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5] as const;
+const flakeFile = { 2: "a", 3: "b", 4: "c", 5: "d", 6: "e" } as const;
 
 type FxKey = "snow" | "pump" | "blink" | "tail";
 
@@ -188,40 +176,49 @@ const Landing: React.FC<LandingProps> = ({
           <img src={prizeSrc} alt="" />
         </button>
         <div className={styles.giftCard}>
-          <img className={styles.giftArt} src={giftSrc} alt="" />
-          <span className={styles.score}>{formatNumberWithCommas(specialItemPoint)}</span>
-          {[1, 2, 3].map((day) =>
-            day <= continuousCheckinCount ? (
-              <img
-                key={day}
-                className={`${styles.stamp} ${styles[`stamp${day}`]}`}
-                src={checkedStampSrc}
-                alt=""
-              />
-            ) : null
-          )}
+          <div className={`${styles.flakeRow} ${styles.flakeTop}`}>
+            {cardFlakes.map((flake, index) => (
+              <img key={index} src={`${cardBase}/flake-${flakeFile[flake]}.svg`} alt="" />
+            ))}
+          </div>
+          <div className={styles.giftCol}>
+            <p className={`${styles.cardLabel} ${labelFont.className}`}>Your Gift Box</p>
+            <div className={styles.giftMeta}>
+              <span className={`${styles.giftDates} ${valueFont.className}`}>1–18 Dec</span>
+              <div className={`${styles.countPill} ${valueFont.className}`}>
+                <img className={styles.pillGift} src={`${cardBase}/gift.png`} alt="" />
+                <span>{formatNumberWithCommas(specialItemPoint)}</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.checkCol}>
+            <p className={`${styles.cardLabel} ${labelFont.className}`}>Daily Check-in</p>
+            <div className={styles.days}>
+              {[1, 2, 3].map((day) => (
+                <div className={styles.day} key={day}>
+                  <img
+                    className={styles.dayMark}
+                    src={day <= continuousCheckinCount ? `${cardBase}/check-done.svg?v=checked` : `${cardBase}/check-empty.svg`}
+                    alt=""
+                  />
+                  <span className={`${styles.dayLabel} ${valueFont.className}`}>Day {day}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className={`${styles.bonus} ${valueFont.className}`}>
+            <img className={styles.bonusBg} src={`${cardBase}/plus-bubble.svg`} alt="" />
+            <span>+30</span>
+            <img className={styles.bonusGift} src={`${cardBase}/gift.png`} alt="" />
+          </div>
+          <div className={`${styles.flakeRow} ${styles.flakeBottom}`}>
+            {cardFlakes.map((flake, index) => (
+              <img key={`b${index}`} src={`${cardBase}/flake-${flakeFile[flake]}.svg`} alt="" />
+            ))}
+          </div>
         </div>
         <button type="button" className={styles.playButton} onClick={onPlay} aria-label="Play">
           <img src={playSrc} alt="" />
-          <span className={styles.bulbRim} aria-hidden="true">
-            {SHINING_BULBS.map(({ bulb: [x, y], index }) => {
-              const phase = Math.abs(Math.sin(index * 12.9898) * 43758.5453);
-              const pace = Math.abs(Math.sin(index * 78.233) * 24634.6345);
-              const phaseRand = phase - Math.floor(phase);
-              const paceRand = pace - Math.floor(pace);
-              return (
-                <i
-                  key={index}
-                  style={{
-                    left: `${x}%`,
-                    top: `${y}%`,
-                    animationDuration: `${6 + paceRand * 4}s`,
-                    animationDelay: `${-phaseRand * 10}s`,
-                  }}
-                />
-              );
-            })}
-          </span>
         </button>
       </div>
 

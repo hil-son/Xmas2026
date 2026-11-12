@@ -28,73 +28,201 @@
   z-index: 20;
 }
 
-.topBarContainer {
+.topBar {
+  position: relative;
   width: 100%;
-  height: clamp(0px, calc(46 / 390 * 100vw), calc(46 / 390 * 600px));
-  margin-top: clamp(0px, calc(100 / 390 * 100vw), calc(100 / 390 * 600px));
-  padding-left: clamp(0px, calc(16 / 390 * 100vw), calc(16 / 390 * 600px));
-  padding-right: clamp(0px, calc(16 / 390 * 100vw), calc(16 / 390 * 600px));
-  background: transparent;
-  display: flex;
-  align-items: center;
+  aspect-ratio: 372 / 136;
   flex-shrink: 0;
-  box-sizing: border-box;
+  background: #123f35;
+  border-radius: calc(10 / 372 * 100%) calc(10 / 372 * 100%) 0 0;
+  overflow: hidden;
+  container-type: inline-size;
+  z-index: 3;
 }
 
-.scoreGroup {
+.flakeRowTop,
+.flakeRowBottom {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: calc(10 / 136 * 100%);
+  pointer-events: none;
+
+  img {
+    height: 100%;
+    width: auto;
+    display: block;
+    flex: 0 0 auto;
+  }
+}
+
+.flakeRowTop,
+.flakeRowBottom {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.flakeRowTop {
+  top: calc(8 / 136 * 100%);
+}
+
+.flakeRowBottom {
+  top: calc(114 / 136 * 100%);
+}
+
+.scoreGroupBest,
+.scoreGroupCurrent {
+  position: absolute;
+  top: calc(37 / 136 * 100%);
+  width: calc(131 / 372 * 100%);
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  margin-left: auto;
-  color: #fff;
-  line-height: 1;
+  align-items: center;
+  gap: calc(5 / 372 * 100cqw);
+}
+
+.scoreGroupBest {
+  left: calc(79 / 372 * 100%);
 }
 
 .scoreGroupCurrent {
-  margin-left: clamp(0px, calc(98 / 390 * 100vw), calc(98 / 390 * 600px));
-  margin-right: 0;
+  left: calc(224 / 372 * 100%);
 }
 
 .scoreLabel {
-  font-family: var(--font-allround-gothic), "Noto Sans TC", sans-serif;
-  font-weight: 500;
-  font-size: clamp(0px, calc(9 / 390 * 100vw), calc(9 / 390 * 600px));
-  letter-spacing: 0.04em;
-  line-height: 1;
+  color: #cea272;
+  font-size: calc(24 / 372 * 100cqw);
+  line-height: calc(20 / 372 * 100cqw);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  text-align: center;
 }
 
-.scoreValue {
-  font-family: var(--font-allround-gothic), "Noto Sans TC", sans-serif;
-  font-weight: 500;
-  font-size: clamp(0px, calc(22 / 390 * 100vw), calc(22 / 390 * 600px));
-  line-height: 0.95;
-  margin-top: clamp(0px, calc(2 / 390 * 100vw), calc(2 / 390 * 600px));
-}
-
-.pauseButton {
-  width: clamp(0px, calc(46 / 390 * 100vw), calc(46 / 390 * 600px));
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
+.scorePill {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  padding: calc(7 / 372 * 100cqw) 0;
+  border-radius: 100px;
+  border: 1px solid #c6a15a;
+  background: linear-gradient(180deg, #143528 0%, #071910 100%);
+  color: #fff;
+  font-size: calc(20 / 372 * 100cqw);
+  line-height: calc(20 / 372 * 100cqw);
+  text-align: center;
+}
+
+.pauseButton {
+  position: absolute;
+  left: calc(15 / 372 * 100%);
+  top: calc(41.5 / 136 * 100%);
+  width: calc(50 / 372 * 100%);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
     display: block;
   }
 }
 
+.pauseBase,
+.pauseInner,
+.pauseGlow,
+.pauseShine,
+.pauseGlint {
+  position: absolute;
+}
+
+.pauseBase {
+  inset: 0;
+}
+
+.pauseInner {
+  inset: 7.35%;
+}
+
+.pauseGlow {
+  inset: 1.54%;
+  mix-blend-mode: screen;
+}
+
+.pauseShine {
+  top: 1.54%;
+  right: 1.56%;
+  bottom: 49.77%;
+  left: 1.58%;
+  mix-blend-mode: screen;
+}
+
+.pauseGlint {
+  top: 1.7%;
+  right: 62.59%;
+  bottom: 73.58%;
+  left: 6.69%;
+  mix-blend-mode: screen;
+}
+
+.pauseBar {
+  position: absolute;
+  left: 36%;
+  top: 34%;
+  width: 10%;
+  height: 30%;
+  border-radius: 4px;
+  background: linear-gradient(to top, #cc5f00, #853700);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.pauseBarRight {
+  left: 54%;
+}
+
+.caneLeft,
+.caneRight {
+  position: absolute;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.caneLeft {
+  left: 0;
+  width: calc(50 / 372 * 100%);
+  height: calc(50 / 136 * 100%);
+}
+
+.caneRight {
+  right: 0;
+  width: calc(54 / 372 * 100%);
+  height: calc(49 / 136 * 100%);
+}
+
+.pauseButton {
+  z-index: 4;
+}
+
 .boardWrapper {
   position: relative;
-  margin-top: clamp(0px, calc(11 / 390 * 100vw), calc(11 / 390 * 600px));
+  z-index: 1;
+  /* The top 40px of gameboard.png is transparent, so tuck it under the header. */
+  margin-top: clamp(
+    calc(-40 / 848 * 451.33 / 390 * 600px),
+    calc(-40 / 848 * 451.33 / 390 * 100vw),
+    0px
+  );
 }
 
 .gameOver {
@@ -217,18 +345,21 @@
   .gameGiftNumberContainer {
     position: absolute;
     top: 50%;
-    left: 75%;
-    transform: translateY(-50%);
+    left: 86%;
+    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
+    justify-content: center;
+    min-width: 1.4em;
+    background: #0d3027;
 
     .giftNumText {
       font-family: var(--font-allround-gothic), "Noto Sans TC", sans-serif !important;
       font-weight: 500 !important;
       font-size: clamp(
         0px,
-        calc(18 / 390 * 100vw),
-        calc(18 / 390 * 600px)
+        calc(16 / 390 * 100vw),
+        calc(16 / 390 * 600px)
       ) !important;
       color: #fff !important;
       line-height: 1;

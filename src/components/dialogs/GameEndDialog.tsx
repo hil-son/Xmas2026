@@ -103,26 +103,28 @@ const GameEndDialog: React.FC<GameEndDialogProps> = ({
         <AppImage
           src={gameConfig.assets.ui.endDialogGiftBoxBg}
           className={styles.resultContainerBg}
-          alt="Game over title"
+          alt=""
         />
-        <div className={styles.infoTopContainer}>
-          <Typography>You have received</Typography>
-          <div className={styles.giftNumberContainer}>
-            <AppImage
-              src={gameConfig.assets.ui.giftBoxIcon}
-              alt="Landing round gift box"
-              className={styles.giftBoxIcon}
-            />
-            <Typography className={styles.giftNumText}>
-              +{formatNumberWithCommas(specialItemMatchNum)}
+        <div className={styles.resultContent}>
+          <div className={styles.infoTopContainer}>
+            <Typography>You have received</Typography>
+            <div className={styles.giftNumberContainer}>
+              <AppImage
+                src={gameConfig.assets.ui.giftBoxIcon}
+                alt=""
+                className={styles.giftBoxIcon}
+              />
+              <Typography className={styles.giftNumText}>
+                +{formatNumberWithCommas(specialItemMatchNum)}
+              </Typography>
+            </div>
+          </div>
+          <div className={styles.infoBottomContainer}>
+            <Typography>Your Score</Typography>
+            <Typography className={styles.scoreNumText}>
+              {formatNumberWithCommas(persistedState.score)}
             </Typography>
           </div>
-        </div>
-        <div className={styles.infoBottomContainer}>
-          <Typography>Your Score</Typography>
-          <Typography className={styles.scoreNumText}>
-            {formatNumberWithCommas(persistedState.score)}
-          </Typography>
         </div>
       </div>
 

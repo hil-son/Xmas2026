@@ -1,45 +1,67 @@
-.root {
-  :global {
-    .MuiBackdrop-root {
-      background-color: rgba(20, 12, 10, 0.72);
-    }
+.scroller {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
 
-    .MuiPaper-root {
-      margin: 16px;
-      border-radius: 20px;
-      background: #fffaf3;
-      max-width: 340px;
-    }
+.copy {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
+  padding-right: 14px;
+  box-sizing: border-box;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
-.card {
-  padding: 22px 20px 18px;
-  color: #3a2a22;
-  font-family: var(--font-allround-gothic), "Noto Sans TC", sans-serif;
+.track {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  cursor: pointer;
+  touch-action: none;
+}
 
-  h2 {
-    margin: 0 0 10px;
-    font-size: 22px;
-  }
+.rail {
+  position: relative;
+  width: 6px;
+  height: 100%;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.28);
+}
 
-  p {
-    margin: 0 0 12px;
-    font-size: 15px;
-    line-height: 1.4;
-  }
+.thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  border-radius: 100px;
+  background: #fff;
+  cursor: grab;
+  touch-action: none;
 
-  button {
-    display: block;
-    width: 100%;
-    margin-top: 6px;
-    border: 0;
-    border-radius: 999px;
-    background: #009017;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    padding: 12px 16px;
-    cursor: pointer;
+  &:active {
+    cursor: grabbing;
   }
+}
+
+.description {
+  margin: clamp(0px, calc(4 / 390 * 100vw), calc(4 / 390 * 600px)) 0 0 !important;
+  font-size: clamp(11px, calc(13 / 390 * 100vw), calc(13 / 390 * 600px)) !important;
+  line-height: 1.35 !important;
+  font-weight: 400 !important;
+  color: #fff;
+  text-align: center;
 }
