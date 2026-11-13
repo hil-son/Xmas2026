@@ -119,9 +119,8 @@ const Landing: React.FC<LandingProps> = ({
 
     const fit = () => {
       const width = parent.clientWidth;
-      const height = parent.clientHeight;
-      if (!width || !height) return;
-      setScale(Math.min(width / STAGE_W, height / STAGE_H));
+      if (!width) return;
+      setScale(width / STAGE_W);
     };
 
     fit();
@@ -253,12 +252,13 @@ const Landing: React.FC<LandingProps> = ({
 
   return (
     <div className={styles.root} ref={rootRef}>
+      <div className={styles.sizer} style={{ height: STAGE_H * scale }}>
       <div
         className={styles.stage}
         style={{
           width: STAGE_W,
           height: STAGE_H,
-          transform: `translate(-50%, -50%) scale(${scale})`,
+          transform: `scale(${scale})`,
         }}
       >
         <img className={styles.plate} src={coverSrc} alt="" />
@@ -292,7 +292,7 @@ const Landing: React.FC<LandingProps> = ({
             <div className={styles.giftMeta}>
               <span className={`${styles.giftDates} ${valueFont.className}`}>1–18 Dec</span>
               <div className={`${styles.countPill} ${valueFont.className}`}>
-                <img className={styles.pillGift} src={`${cardBase}/gift.png`} alt="" />
+                <img className={styles.pillGift} src={`${gameConfig.basePath}/images/xmas-giftbox-2.png?v=goldgift`} alt="" />
                 <span>{formatNumberWithCommas(specialItemPoint)}</span>
               </div>
             </div>
@@ -315,7 +315,7 @@ const Landing: React.FC<LandingProps> = ({
           <div className={`${styles.bonus} ${valueFont.className}`}>
             <img className={styles.bonusBg} src={`${cardBase}/plus-bubble.svg`} alt="" />
             <span>+30</span>
-            <img className={styles.bonusGift} src={`${cardBase}/gift.png`} alt="" />
+            <img className={styles.bonusGift} src={`${gameConfig.basePath}/images/xmas-giftbox-2.png?v=goldgift`} alt="" />
           </div>
           <div className={`${styles.flakeRow} ${styles.flakeBottom}`}>
             {cardFlakes.map((flake, index) => (
@@ -326,6 +326,7 @@ const Landing: React.FC<LandingProps> = ({
         <button ref={playRef} type="button" className={styles.playButton} onClick={onPlay} aria-label="Play">
           <img src={playSrc} alt="" />
         </button>
+      </div>
       </div>
 
       <div className={styles.fxToggles}>

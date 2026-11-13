@@ -65,14 +65,14 @@
 
 .titleImage {
   position: relative;
-  width: 105%;
-  left: -2.5%;
+  display: block;
+  width: calc(105% * 0.75);
   margin-left: auto;
   margin-right: auto;
 }
 
 .contentContainer {
-  margin-top: clamp(calc(-30 / 390 * 600px), calc(-30 / 390 * 100vw), 0px);
+  margin-top: clamp(calc(-22.5 / 390 * 600px), calc(-22.5 / 390 * 100vw), 0px);
   padding: clamp(0px, calc(45 / 390 * 100vw), calc(45 / 390 * 600px))
     clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px))
     clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px))

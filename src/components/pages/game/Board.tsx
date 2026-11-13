@@ -54,7 +54,7 @@ const Board: React.FC<BoardProps> = ({
   });
   // const invalidSound = useSound("/sounds/invalid.mp3", { volume: 0.4 });
 
-  const specialItemType = 1; // Assuming type 1 is the special item
+  const specialItemType = 4; // Gift box, the fourth board item
 
   // Initialize the board with random items
   const initializeBoard = () => {
@@ -293,7 +293,7 @@ const Board: React.FC<BoardProps> = ({
 
     const newBoard = [...board];
 
-    // Count special items (type === 1) in matches
+    // Count cleared gift boxes
     let specialItemCount = 0;
 
     // Mark matched items

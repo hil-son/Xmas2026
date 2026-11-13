@@ -141,7 +141,7 @@ export const gameConfig = {
       `${basePath}/images/items-deer.png`,
       `${basePath}/images/items-angel.png`,
       `${basePath}/images/items-pug.png?v=sit`,
-      `${basePath}/images/items-lantern.png`,
+      `${basePath}/images/items-giftbox.png?v=goldgift`,
       `${basePath}/images/items-tree.png`,
       `${basePath}/images/items-snowman.png`,
     ],
@@ -184,12 +184,12 @@ export const gameConfig = {
       itemHighlightStar: `${basePath}/images/item-highlight-star.png`,
       instructionsAnimation: `${basePath}/images/instructions-animation-xmas.gif?v=nostar`,
       instructionsTimeBar: `${basePath}/images/instructions-time-bar.png?v=art`,
-      instructionsGiftNumSample: `${basePath}/images/instructions-gift-num-sample.png?v=art`,
+      instructionsGiftNumSample: `${basePath}/images/instructions-gift-num-sample.png?v=goldgift`,
       
       checkInDialogCheckInBox: {
-        day1:  `${basePath}/images/check-in-box-day-1.png?v=art`,
-        day2:  `${basePath}/images/check-in-box-day-2.png?v=art`,
-        day3:  `${basePath}/images/check-in-box-day-3.png?v=art`,
+        day1:  `${basePath}/images/check-in-box-day-1.png?v=goldgift`,
+        day2:  `${basePath}/images/check-in-box-day-2.png?v=goldgift`,
+        day3:  `${basePath}/images/check-in-box-day-3.png?v=goldgift`,
       },
 
       checkInDialogCheckInTopBanner: {
@@ -198,9 +198,9 @@ export const gameConfig = {
         day3:  `${basePath}/images/check-in-box-day-3-top-banner.png?v=xmas`,
       },
 
-      giftBoxIcon: `${basePath}/images/xmas-giftbox.png`,
+      giftBoxIcon: `${basePath}/images/xmas-giftbox-2.png?v=goldgift`,
 
-      gameBottomGiftNumBar: `${basePath}/images/game-gift-box-bar.png?v=art`,
+      gameBottomGiftNumBar: `${basePath}/images/game-gift-box-bar.png?v=goldgift`,
 
       endDialogGiftBoxBg: `${basePath}/images/end-dialog-gift-box-bg.png?v=frame`,
     },
