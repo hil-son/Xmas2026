@@ -218,14 +218,48 @@
   top: 518px;
   left: 0;
   width: 100%;
-  height: 128px;
+  height: calc(468 / 832 * 393px);
   box-sizing: border-box;
-  background: #123f35;
-  border-top: 3px solid #0c5e4a;
-  border-bottom: 3px solid #0c5e4a;
-  border-radius: 0;
+  background: transparent;
   overflow: visible;
 }
+
+.giftCardArt {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+}
+
+.liveCount {
+  position: absolute;
+  left: 31.5%;
+  top: 30.8%;
+  width: 8.4%;
+  height: 6.8%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.liveDay {
+  position: absolute;
+  top: 22%;
+  width: 8.8%;
+  height: 15.6%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.liveDay1 { left: 49.9%; }
+.liveDay2 { left: 62.4%; }
+.liveDay3 { left: 74.9%; }
 
 .flakeRow {
   position: absolute;
@@ -381,9 +415,9 @@
 }
 
 .playButton {
-  top: 620px;
-  left: calc((393px - 357px * 1.1) / 2);
-  width: calc(357px * 1.1);
+  top: 629px;
+  left: 28px;
+  width: 333px;
   height: auto;
   cursor: pointer;
   transform-origin: center center;

@@ -1,6 +1,6 @@
 import AppImage from "@components/AppImage";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Abhaya_Libre, Montserrat_Alternates } from "next/font/google";
+import { Montserrat_Alternates } from "next/font/google";
 import { gameConfig } from "@config/gameConfig";
 import { formatNumberWithCommas } from "@utils/index";
 import styles from "./Landing.module.scss";
@@ -18,16 +18,13 @@ interface LandingProps {
   onEventDetails: () => void;
 }
 
-const labelFont = Abhaya_Libre({ weight: "800", subsets: ["latin"], display: "swap" });
 const valueFont = Montserrat_Alternates({ weight: "700", subsets: ["latin"], display: "swap" });
 
 const coverSrc = `${gameConfig.basePath}/images/cover.png`;
 const pugSrc = `${gameConfig.basePath}/images/pug.png`;
 const playSrc = `${gameConfig.basePath}/images/cover-play.png?v=lights`;
 const cardBase = `${gameConfig.basePath}/images/covercard`;
-
-const cardFlakes = [2, 3, 2, 4, 2, 4, 2, 4, 2, 5, 6, 5, 6, 5, 6, 5, 6, 5, 2, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5] as const;
-const flakeFile = { 2: "a", 3: "b", 4: "c", 5: "d", 6: "e" } as const;
+const giftCardSrc = `${gameConfig.basePath}/images/cover-gift-card.png?v=cardspace`;
 
 type FxKey = "snow" | "pump" | "blink" | "tail";
 
@@ -341,46 +338,20 @@ const Landing: React.FC<LandingProps> = ({
         <img className={styles.plateExtend} src={coverSrc} alt="" />
         <canvas className={styles.snow} ref={snowRef} width={STAGE_W} height={STAGE_H} />
         <div className={styles.giftCard}>
-          <div className={`${styles.flakeRow} ${styles.flakeTop}`}>
-            {cardFlakes.map((flake, index) => (
-              <img key={index} src={`${cardBase}/flake-${flakeFile[flake]}.svg`} alt="" />
-            ))}
-          </div>
-          <div className={styles.giftCol}>
-            <p className={`${styles.cardLabel} ${labelFont.className}`}>Your Gift Box</p>
-            <div className={styles.giftMeta}>
-              <span className={`${styles.giftDates} ${valueFont.className}`}>1–18 Dec</span>
-              <div className={`${styles.countPill} ${valueFont.className}`}>
-                <img className={styles.pillGift} src={`${gameConfig.basePath}/images/xmas-giftbox-2.png?v=goldgift`} alt="" />
-                <span>{formatNumberWithCommas(specialItemPoint)}</span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.checkCol}>
-            <p className={`${styles.cardLabel} ${labelFont.className}`}>Daily Check-in</p>
-            <div className={styles.days}>
-              {[1, 2, 3].map((day) => (
-                <div className={styles.day} key={day}>
-                  <img
-                    className={styles.dayMark}
-                    src={day <= continuousCheckinCount ? `${cardBase}/check-done.svg?v=checked` : `${cardBase}/check-empty.svg`}
-                    alt=""
-                  />
-                  <span className={`${styles.dayLabel} ${valueFont.className}`}>Day {day}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className={`${styles.bonus} ${valueFont.className}`}>
-            <img className={styles.bonusBg} src={`${cardBase}/plus-bubble.svg`} alt="" />
-            <span>+30</span>
-            <img className={styles.bonusGift} src={`${gameConfig.basePath}/images/xmas-giftbox-2.png?v=goldgift`} alt="" />
-          </div>
-          <div className={`${styles.flakeRow} ${styles.flakeBottom}`}>
-            {cardFlakes.map((flake, index) => (
-              <img key={`b${index}`} src={`${cardBase}/flake-${flakeFile[flake]}.svg`} alt="" />
-            ))}
-          </div>
+          <img className={styles.giftCardArt} src={giftCardSrc} alt="" />
+          <span className={`${styles.liveCount} ${valueFont.className}`}>
+            {formatNumberWithCommas(specialItemPoint)}
+          </span>
+          {[1, 2, 3].map((day) => (
+            day <= continuousCheckinCount ? (
+              <img
+                key={day}
+                className={`${styles.liveDay} ${styles[`liveDay${day}`]}`}
+                src={`${cardBase}/check-done.svg?v=checked`}
+                alt=""
+              />
+            ) : null
+          ))}
         </div>
         <button ref={playRef} type="button" className={styles.playButton} onClick={onPlay} aria-label="Play">
           <img src={playSrc} alt="" />
