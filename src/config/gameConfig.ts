@@ -167,7 +167,7 @@ export const gameConfig = {
       // Buttons
       audioOnButton: `${basePath}/images/audio-on-button.png`,
       audioOffButton: `${basePath}/images/audio-off-button.png`,
-      playNowButton: `${basePath}/images/play-now-button.png?v=green`,
+      playNowButton: `${basePath}/images/startgame-game-button.png?v=angel`,
       nextButton: `${basePath}/images/next-button.png?v=lantern`,
       menuButton: `${basePath}/images/menu-button.png`,
       resumeGameButton: `${basePath}/images/resume-game-button.png?v=lights`,
@@ -182,7 +182,7 @@ export const gameConfig = {
       // Game elements
       itemHighlightBorder: `${basePath}/images/item-highlight-border.png`,
       itemHighlightStar: `${basePath}/images/item-highlight-star.png`,
-      instructionsAnimation: `${basePath}/images/instructions-animation-xmas.gif?v=turn`,
+      instructionsAnimation: `${basePath}/images/instructions-animation-xmas.gif?v=nostar`,
       instructionsTimeBar: `${basePath}/images/instructions-time-bar.png?v=art`,
       instructionsGiftNumSample: `${basePath}/images/instructions-gift-num-sample.png?v=art`,
       
