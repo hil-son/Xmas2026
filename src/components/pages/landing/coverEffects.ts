@@ -8,6 +8,8 @@ export type CoverFx = {
   blink: boolean;
   tail: boolean;
   pumpBurst: number;
+  glitterTouch: boolean;
+  stir: number;
 };
 
 type CoverNodes = {
@@ -267,8 +269,12 @@ export function startCoverEffects({
     if (!globeCtx) return;
     globeTime += dt;
     if (fx.pumpBurst > 0) fx.pumpBurst = Math.max(0, fx.pumpBurst - dt);
+    if (!fx.glitterTouch) fx.stir = 0;
+    else if (fx.stir > 0) fx.stir = Math.max(0, fx.stir - dt / 4);
     const pump = fx.pump ? 1 : 0;
     const burst = fx.pumpBurst > 0 ? fx.pumpBurst / 1.8 : 0;
+    const stir = fx.stir > 0 ? 0.5 - 0.5 * Math.cos(Math.PI * fx.stir) : 0;
+    const speed = 1 + stir * 3;
     const cx = GLOBE / 2;
     const cy = GLOBE / 2 + 8;
     const swirl = (5 + pump * 22 + burst * 48) * (0.7 + 0.3 * Math.sin(globeTime * 0.37));
@@ -291,7 +297,8 @@ export function startCoverEffects({
       particle.wander +=
         (Math.sin(globeTime * particle.wanderRate + particle.phase) + (Math.random() - 0.5) * 1.4) *
         dt *
-        2.2;
+        2.2 *
+        speed;
       const sink = particle.settle ? 14 : 3;
       const inward = radius > GLOBE_R * 0.72 && !particle.settle ? (radius - GLOBE_R * 0.72) * 0.55 : 0;
       const wantX = tx * swirl * swirlSign * 0.45 + Math.cos(particle.wander) * jitter - (dx / radius) * inward;
@@ -304,11 +311,11 @@ export function startCoverEffects({
       const follow = Math.min(1, dt * (1.3 + burst));
       particle.vx += (wantX - particle.vx) * follow;
       particle.vy += (wantY - particle.vy) * follow;
-      particle.x += particle.vx * dt;
-      particle.y += particle.vy * dt;
+      particle.x += particle.vx * dt * speed;
+      particle.y += particle.vy * dt * speed;
       particle.z += particle.vz * dt;
       if (particle.z > 1 || particle.z < -1) particle.vz *= -1;
-      particle.ang += particle.spin * dt * (1 + pump * 1.8 + burst * 2.4);
+      particle.ang += particle.spin * dt * (1 + pump * 1.8 + burst * 2.4) * speed;
       const ddx = particle.x - GLOBE / 2;
       const ddy = particle.y - GLOBE / 2;
       const rr = Math.hypot(ddx, ddy);

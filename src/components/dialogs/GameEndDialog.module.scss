@@ -118,12 +118,7 @@
 }
 
 .button {
-  /* Same rendered size as the homepage Play button (357px on the 393×852 cover). */
-  width: min(
-    calc(357 / 393 * 100vw),
-    calc(357 / 393 * 600px),
-    calc(357 / 852 * 100vh)
-  );
+  width: clamp(calc(230px * 1.3), calc(230 / 390 * 1.3 * 100vw), calc(230 / 390 * 1.3 * 600px));
 
   & + .button {
     margin-top: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));

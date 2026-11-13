@@ -441,6 +441,97 @@
   border-color: rgba(255, 246, 214, 0.95);
 }
 
+.globeHit {
+  position: absolute;
+  left: 52px;
+  top: 124px;
+  z-index: 9;
+  width: 292px;
+  height: 292px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 3px;
+  }
+}
+
+.globeHitOff {
+  cursor: default;
+}
+
+.howToButton {
+  position: absolute;
+  top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  left: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  z-index: 20;
+  width: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  height: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe7a3 0%, #f0b429 46%, #d39212 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: clamp(22px, calc(26 / 390 * 100vw), calc(26 / 390 * 600px));
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(120, 72, 8, 0.35);
+
+  &:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.glitterToggle {
+  position: absolute;
+  top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  left: clamp(0px, calc(75 / 390 * 100vw), calc(75 / 390 * 600px));
+  z-index: 20;
+  width: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  height: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe7a3 0%, #f0b429 46%, #d39212 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+
+  svg {
+    width: 58%;
+    height: 58%;
+    display: block;
+    filter: drop-shadow(0 1px 0 rgba(120, 72, 8, 0.35));
+  }
+
+  &:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.glitterOff {
+  background: rgba(36, 28, 22, 0.62);
+  color: rgba(255, 255, 255, 0.78);
+  box-shadow: none;
+
+  svg {
+    filter: none;
+  }
+}
+
 .audioControlButton {
   position: absolute;
   top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));

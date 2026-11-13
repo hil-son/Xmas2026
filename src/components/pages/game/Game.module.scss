@@ -278,7 +278,11 @@
 
 .timeBarContainer {
   position: relative;
-  margin-top: clamp(0px, calc(12 / 390 * 100vw), calc(12 / 390 * 600px));
+  margin-top: clamp(
+    calc(-12 / 390 * 600px),
+    calc(-12 / 390 * 100vw),
+    0px
+  );
   width: clamp(0px, calc(361 / 390 * 100vw), calc(361 / 390 * 600px));
   height: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
   border-radius: 999px;

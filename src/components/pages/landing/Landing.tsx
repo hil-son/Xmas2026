@@ -90,6 +90,7 @@ const Landing: React.FC<LandingProps> = ({
   specialItemPoint,
   setAudioOn,
   onPlay,
+  onInstructions,
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const lightsRef = useRef<HTMLDivElement>(null);
@@ -105,8 +106,11 @@ const Landing: React.FC<LandingProps> = ({
     blink: false,
     tail: false,
     pumpBurst: 1.6,
+    glitterTouch: true,
+    stir: 0,
   });
   const [fxOn, setFxOn] = useState({ snow: true, pump: true, blink: false, tail: false });
+  const [glitterOn, setGlitterOn] = useState(true);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -176,6 +180,70 @@ const Landing: React.FC<LandingProps> = ({
     };
   }, []);
 
+  const toggleGlitterTouch = () => {
+    const next = !fxRef.current.glitterTouch;
+    fxRef.current.glitterTouch = next;
+    if (!next) fxRef.current.stir = 0;
+    setGlitterOn(next);
+  };
+
+  const stirGlobe = () => {
+    if (!fxRef.current.glitterTouch || fxRef.current.stir > 0) return;
+    fxRef.current.stir = 1;
+  };
+
+  useEffect(() => {
+    let listening = false;
+    let armed = false;
+    let asked = false;
+
+    const onOrientation = (event: DeviceOrientationEvent) => {
+      const beta = event.beta;
+      if (beta == null) return;
+      const upright = beta >= 25 && beta <= 140;
+      const upsideDown = beta <= -50 || beta >= 150;
+      if (upright) {
+        armed = true;
+        return;
+      }
+      if (!armed || !upsideDown) return;
+      armed = false;
+      if (!fxRef.current.glitterTouch || fxRef.current.stir > 0) return;
+      fxRef.current.stir = 1;
+    };
+
+    const listen = () => {
+      if (listening) return;
+      listening = true;
+      window.addEventListener("deviceorientation", onOrientation);
+    };
+
+    const ask = () => {
+      const orientationEvent = DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+        requestPermission?: () => Promise<"granted" | "denied">;
+      };
+      if (typeof orientationEvent.requestPermission !== "function") return;
+      if (asked) return;
+      asked = true;
+      void orientationEvent.requestPermission().then((state) => {
+        if (state !== "granted") return;
+        window.removeEventListener("deviceorientation", onOrientation);
+        listening = false;
+        listen();
+      }).catch(() => {});
+    };
+
+    const needsPermission = typeof (DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<"granted" | "denied">;
+    }).requestPermission === "function";
+    if (!needsPermission) listen();
+    window.addEventListener("pointerdown", ask);
+    return () => {
+      window.removeEventListener("deviceorientation", onOrientation);
+      window.removeEventListener("pointerdown", ask);
+    };
+  }, []);
+
   const toggleFx = (key: FxKey) => {
     const next = !fxRef.current[key];
     fxRef.current[key] = next;
@@ -199,6 +267,12 @@ const Landing: React.FC<LandingProps> = ({
         <canvas className={styles.globeSnow} ref={globeRef} width={292} height={292} />
         <div className={styles.shinePlaque} />
         <canvas className={styles.snow} ref={snowRef} width={STAGE_W} height={STAGE_H} />
+        <button
+          type="button"
+          className={glitterOn ? styles.globeHit : `${styles.globeHit} ${styles.globeHitOff}`}
+          aria-label="Swirl the snow globe"
+          onPointerDown={stirGlobe}
+        />
         <button
           type="button"
           className={styles.prizeCard}
@@ -279,6 +353,27 @@ const Landing: React.FC<LandingProps> = ({
         ))}
       </div>
 
+      <button
+        type="button"
+        className={styles.howToButton}
+        aria-label="How to play"
+        onClick={onInstructions}
+      >
+        ?
+      </button>
+      <button
+        type="button"
+        className={glitterOn ? styles.glitterToggle : `${styles.glitterToggle} ${styles.glitterOff}`}
+        aria-pressed={glitterOn}
+        aria-label={glitterOn ? "Snow globe touch on" : "Snow globe touch off"}
+        onClick={toggleGlitterTouch}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <path d="M12 3v18M5.2 6.8l13.6 10.4M18.8 6.8 5.2 17.2" />
+          <path d="M12 6.2 13.4 4M12 6.2 10.6 4M12 17.8l1.4 2.2M12 17.8 10.6 20M7.2 8.4 5.4 7.2M7.2 8.4l.2-2.2M16.8 15.6l1.8 1.2M16.8 15.6l-.2 2.2M16.8 8.4l1.8-1.2M16.8 8.4l-.2-2.2M7.2 15.6 5.4 16.8M7.2 15.6l.2 2.2" />
+          {!glitterOn && <path d="M5 19 19 5" strokeWidth="2.2" />}
+        </svg>
+      </button>
       <button
         type="button"
         className={styles.audioControlButton}
