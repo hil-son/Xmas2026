@@ -24,7 +24,6 @@ const valueFont = Montserrat_Alternates({ weight: "700", subsets: ["latin"], dis
 const coverSrc = `${gameConfig.basePath}/images/cover.png`;
 const pugSrc = `${gameConfig.basePath}/images/pug.png`;
 const playSrc = `${gameConfig.basePath}/images/cover-play.png?v=lights`;
-const prizeSrc = `${gameConfig.basePath}/images/cover-prize.png`;
 const cardBase = `${gameConfig.basePath}/images/covercard`;
 
 const cardFlakes = [2, 3, 2, 4, 2, 4, 2, 4, 2, 5, 6, 5, 6, 5, 6, 5, 6, 5, 2, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5, 6, 5] as const;
@@ -84,6 +83,26 @@ const FX_COLUMNS: FxKey[][] = [
   ["blink", "tail"],
 ];
 
+const DISCO_COLORS = ["#ff3b8d", "#7c4dff", "#2f9bff", "#3dff8a", "#ffe14a", "#ff4b3a", "#49fff0", "#ff4dff"];
+const DISCO_MS = 4000;
+
+function discoSpots(count: number, seed: number) {
+  let n = seed;
+  const rand = () => {
+    n = (n * 16807) % 2147483647;
+    return (n - 1) / 2147483646;
+  };
+  return Array.from({ length: count }, (_, index) => ({
+    x: 4 + rand() * 92,
+    y: 2 + rand() * 78,
+    s: 11 + rand() * 16,
+    c: DISCO_COLORS[index % DISCO_COLORS.length],
+    d: `${(rand() * 0.2).toFixed(2)}s`,
+  }));
+}
+
+const DISCO_FIELDS = [discoSpots(28, 11), discoSpots(24, 29)];
+
 const Landing: React.FC<LandingProps> = ({
   audioOn,
   continuousCheckinCount,
@@ -111,6 +130,8 @@ const Landing: React.FC<LandingProps> = ({
   });
   const [fxOn, setFxOn] = useState({ snow: true, pump: true, blink: false, tail: false });
   const [glitterOn, setGlitterOn] = useState(true);
+  const [discoOn, setDiscoOn] = useState(false);
+  const discoTimerRef = useRef(0);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -243,6 +264,20 @@ const Landing: React.FC<LandingProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    return () => window.clearTimeout(discoTimerRef.current);
+  }, []);
+
+  const toggleDisco = () => {
+    window.clearTimeout(discoTimerRef.current);
+    if (discoOn) {
+      setDiscoOn(false);
+      return;
+    }
+    setDiscoOn(true);
+    discoTimerRef.current = window.setTimeout(() => setDiscoOn(false), DISCO_MS);
+  };
+
   const toggleFx = (key: FxKey) => {
     const next = !fxRef.current[key];
     fxRef.current[key] = next;
@@ -261,26 +296,50 @@ const Landing: React.FC<LandingProps> = ({
           transform: `scale(${scale})`,
         }}
       >
-        <img className={styles.plate} src={coverSrc} alt="" />
-        <div className={styles.lights} ref={lightsRef} />
-        <canvas className={styles.pugLive} ref={pugRef} />
-        <canvas className={styles.globeSnow} ref={globeRef} width={292} height={292} />
-        <div className={styles.shinePlaque} />
+        <div className={styles.scene}>
+          <img className={styles.plate} src={coverSrc} alt="" />
+          <div className={styles.lights} ref={lightsRef} />
+          <canvas className={styles.pugLive} ref={pugRef} />
+          <canvas className={styles.globeSnow} ref={globeRef} width={292} height={292} />
+          {discoOn && (
+            <div className={styles.disco} aria-hidden>
+              {DISCO_FIELDS.map((spots, field) => (
+                <div className={field === 0 ? styles.discoField : `${styles.discoField} ${styles.discoFieldFast}`} key={field}>
+                  {spots.map((spot, index) => (
+                    <i
+                      key={index}
+                      className={styles.discoSpot}
+                      style={{
+                        left: `${spot.x}%`,
+                        top: `${spot.y}%`,
+                        width: `${spot.s}px`,
+                        height: `${spot.s}px`,
+                        background: `radial-gradient(circle, #fff 0%, ${spot.c} 26%, transparent 70%)`,
+                        boxShadow: `0 0 12px 2px ${spot.c}`,
+                        animationDelay: spot.d,
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+          <div className={styles.shinePlaque} />
+          <button
+            type="button"
+            className={glitterOn ? styles.globeHit : `${styles.globeHit} ${styles.globeHitOff}`}
+            aria-label="Swirl the snow globe"
+            onPointerDown={stirGlobe}
+          />
+          <button
+            type="button"
+            className={styles.prizeCard}
+            onClick={() => setPrizeOpen(true)}
+            aria-label="Prize details"
+          />
+        </div>
+        <img className={styles.plateExtend} src={coverSrc} alt="" />
         <canvas className={styles.snow} ref={snowRef} width={STAGE_W} height={STAGE_H} />
-        <button
-          type="button"
-          className={glitterOn ? styles.globeHit : `${styles.globeHit} ${styles.globeHitOff}`}
-          aria-label="Swirl the snow globe"
-          onPointerDown={stirGlobe}
-        />
-        <button
-          type="button"
-          className={styles.prizeCard}
-          onClick={() => setPrizeOpen(true)}
-          aria-label="Prize details"
-        >
-          <img src={prizeSrc} alt="" />
-        </button>
         <div className={styles.giftCard}>
           <div className={`${styles.flakeRow} ${styles.flakeTop}`}>
             {cardFlakes.map((flake, index) => (
@@ -373,6 +432,21 @@ const Landing: React.FC<LandingProps> = ({
           <path d="M12 3v18M5.2 6.8l13.6 10.4M18.8 6.8 5.2 17.2" />
           <path d="M12 6.2 13.4 4M12 6.2 10.6 4M12 17.8l1.4 2.2M12 17.8 10.6 20M7.2 8.4 5.4 7.2M7.2 8.4l.2-2.2M16.8 15.6l1.8 1.2M16.8 15.6l-.2 2.2M16.8 8.4l1.8-1.2M16.8 8.4l-.2-2.2M7.2 15.6 5.4 16.8M7.2 15.6l.2 2.2" />
           {!glitterOn && <path d="M5 19 19 5" strokeWidth="2.2" />}
+        </svg>
+      </button>
+      <button
+        type="button"
+        className={discoOn ? styles.discoToggle : `${styles.discoToggle} ${styles.glitterOff}`}
+        aria-pressed={discoOn}
+        aria-label={discoOn ? "Disco lights on" : "Disco lights"}
+        onClick={toggleDisco}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden>
+          <circle cx="7" cy="8" r="2.1" fill="#ff3b8d" />
+          <circle cx="16.5" cy="6.5" r="2.4" fill="#7c4dff" />
+          <circle cx="12" cy="13" r="2.6" fill="#ffe14a" />
+          <circle cx="6.5" cy="16.5" r="1.8" fill="#3dff8a" />
+          <circle cx="17" cy="16" r="2" fill="#2f9bff" />
         </svg>
       </button>
       <button

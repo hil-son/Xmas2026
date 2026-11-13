@@ -90,7 +90,7 @@ const GameEndDialog: React.FC<GameEndDialogProps> = ({
       </div>
 
       <AppImage
-        src={gameConfig.assets.ui.giftBoxIcon}
+        src={gameConfig.assets.ui.endDialogTopGift}
         className={styles.titleImage}
         alt="Game over title"
       />

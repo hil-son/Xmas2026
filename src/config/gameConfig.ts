@@ -82,9 +82,9 @@ export const gameConfig = {
   // SOUND CONFIGURATION
   // ==========================================
   sounds: {
-    // Background music: Cheerful Christmas Time by Tarush Singhal, CC0 1.0. Instrumental.
+    // Background music: Away in a Manger, United States Marine Band. Public domain.
     background: {
-      path: `${basePath}/sounds/background.m4a?v=cheerful`,
+      path: `${basePath}/sounds/background.m4a?v=lovedones`,
       volume: 0.5,
     },
 
@@ -199,6 +199,7 @@ export const gameConfig = {
       },
 
       giftBoxIcon: `${basePath}/images/xmas-giftbox-2.png?v=goldgift`,
+      endDialogTopGift: `${basePath}/images/xmas-giftbox-top.png?v=stars`,
 
       gameBottomGiftNumBar: `${basePath}/images/game-gift-box-bar.png?v=goldgift`,
 

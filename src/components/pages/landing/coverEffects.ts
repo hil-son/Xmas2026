@@ -44,6 +44,7 @@ type Glitter = {
   wanderRate: number;
   settle: boolean;
   extra: boolean;
+  home: number;
 };
 
 const COVER_BULBS: Array<[number, number, number, number]> = [
@@ -89,7 +90,9 @@ function makeFlakes(): Flake[] {
 }
 
 const GLOBE = 292;
-const GLOBE_R = GLOBE / 2 - 4;
+const GLOBE_R = GLOBE / 2 - 1;
+// The glass ends on a flat base, not the bottom of the circle. Stage y 386.
+const GLOBE_FLOOR = 262;
 const GLITTER_INK = ["rgb(255,255,255)", "rgb(255,228,170)", "rgb(198,255,214)"];
 
 function glitterHalo(rgb: string) {
@@ -118,7 +121,7 @@ function makeGlitter(extra: boolean): Glitter {
   const hueRoll = Math.random();
   return {
     x: GLOBE / 2 + Math.cos(angle) * dist,
-    y: Math.min(268, GLOBE / 2 + Math.sin(angle) * dist),
+    y: GLOBE / 2 + Math.sin(angle) * dist,
     z: Math.random() * 2 - 1,
     vz: (Math.random() - 0.5) * 0.35,
     vx: (Math.random() - 0.5) * 10,
@@ -132,6 +135,7 @@ function makeGlitter(extra: boolean): Glitter {
     wander: Math.random() * Math.PI * 2,
     wanderRate: 0.6 + Math.random() * 2.2,
     settle: Math.random() < 0.16,
+    home: Math.sqrt(Math.random()) * GLOBE_R * 0.98,
     extra,
   };
 }
@@ -285,6 +289,9 @@ export function startCoverEffects({
     globeCtx.beginPath();
     globeCtx.arc(GLOBE / 2, GLOBE / 2, GLOBE_R, 0, Math.PI * 2);
     globeCtx.clip();
+    globeCtx.beginPath();
+    globeCtx.rect(0, 0, GLOBE, GLOBE_FLOOR);
+    globeCtx.clip();
     globeCtx.lineCap = "round";
     for (let i = 0; i < glitter.length; i += 1) {
       const particle = glitter[i];
@@ -299,15 +306,15 @@ export function startCoverEffects({
         dt *
         2.2 *
         speed;
-      const sink = particle.settle ? 14 : 3;
-      const inward = radius > GLOBE_R * 0.72 && !particle.settle ? (radius - GLOBE_R * 0.72) * 0.55 : 0;
-      const wantX = tx * swirl * swirlSign * 0.45 + Math.cos(particle.wander) * jitter - (dx / radius) * inward;
+      const sink = particle.settle ? 10 : 1;
+      const radial = (particle.home - radius) * 2.4;
+      const wantX = tx * swirl * swirlSign * 0.45 + Math.cos(particle.wander) * jitter + (dx / radius) * radial;
       const wantY =
         ty * swirl * swirlSign * 0.45 +
         Math.sin(particle.wander * 1.17 + particle.phase) * jitter +
         sink -
-        burst * 40 -
-        (dy / radius) * inward;
+        burst * 40 +
+        (dy / radius) * radial;
       const follow = Math.min(1, dt * (1.3 + burst));
       particle.vx += (wantX - particle.vx) * follow;
       particle.vy += (wantY - particle.vy) * follow;
@@ -319,29 +326,23 @@ export function startCoverEffects({
       const ddx = particle.x - GLOBE / 2;
       const ddy = particle.y - GLOBE / 2;
       const rr = Math.hypot(ddx, ddy);
-      if (rr > GLOBE_R - 1) {
+      if (rr > GLOBE_R - 0.5) {
         const nx = ddx / rr;
         const ny = ddy / rr;
-        particle.x = GLOBE / 2 + nx * (GLOBE_R - 1.4);
-        particle.y = GLOBE / 2 + ny * (GLOBE_R - 1.4);
+        particle.x = GLOBE / 2 + nx * (GLOBE_R - 1);
+        particle.y = GLOBE / 2 + ny * (GLOBE_R - 1);
         const vn = particle.vx * nx + particle.vy * ny;
         if (vn > 0) {
-          particle.vx -= vn * nx * 1.35;
-          particle.vy -= vn * ny * 1.35;
+          particle.vx -= vn * nx * 1.6;
+          particle.vy -= vn * ny * 1.6;
         }
-        particle.vx += -ny * swirlSign * 10 * dt;
-        particle.vy += nx * swirlSign * 10 * dt;
       }
-      const floorGone = 296;
-      if (particle.y > floorGone) {
-        particle.y = floorGone - (particle.y - floorGone);
-        if (particle.vy > 0) particle.vy *= -0.4;
+      if (particle.y > GLOBE_FLOOR - 1) {
+        const limit = GLOBE_FLOOR - 1;
+        particle.y = limit - (particle.y - limit);
+        if (particle.vy > 0) particle.vy *= -0.5;
       }
-      const gy = particle.y - GLOBE / 2;
-      const gx = particle.x - GLOBE / 2;
-      const rim = Math.hypot(gx, gy) / GLOBE_R;
-      let floorFade = Math.max(0, Math.min(1, (floorGone - particle.y) / 26));
-      if (gy > 108 && rim > 0.78) floorFade *= 1 - Math.min(1, (rim - 0.78) / 0.18);
+      const floorFade = particle.y > GLOBE_FLOOR - 16 ? Math.max(0, (GLOBE_FLOOR - particle.y) / 16) : 1;
       if (floorFade <= 0.02) continue;
       const depth = 0.5 + 0.5 * (particle.z * 0.5 + 0.5);
       const facing = Math.cos(particle.ang - 0.7);

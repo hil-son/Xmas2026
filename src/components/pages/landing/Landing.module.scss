@@ -26,6 +26,15 @@
   background: #1a100c;
 }
 
+.scene {
+  position: absolute;
+  left: 0;
+  top: -56px;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 .plate {
   position: absolute;
   inset: 0;
@@ -34,6 +43,22 @@
   object-fit: cover;
   pointer-events: none;
   user-select: none;
+}
+
+.plateExtend {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  object-position: center bottom;
+  transform: scaleY(-1);
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 28px);
+  mask-image: linear-gradient(to bottom, transparent, #000 28px);
 }
 
 .lights,
@@ -50,7 +75,7 @@
 .globeSnow {
   position: absolute;
   left: 52px;
-  top: 124px;
+  top: 112px;
   width: 292px;
   height: 292px;
   border-radius: 50%;
@@ -122,42 +147,45 @@
 
 .shinePlaque {
   position: absolute;
-  left: 88px;
-  top: 446px;
-  width: 218px;
-  height: 84px;
+  left: 118px;
+  top: 439px;
+  width: 183px;
+  height: 85px;
   overflow: hidden;
-  border-radius: 4px;
   pointer-events: none;
   z-index: 3;
+  /* The plate is a trapezoid: top is level, the bottom edge rises toward the right. */
+  clip-path: polygon(0 0, 100% 0, 100% 84.6%, 0 100%);
 
   &::after {
     content: "";
     position: absolute;
-    top: -30%;
-    bottom: -30%;
-    width: 42%;
-    left: -50%;
+    top: 1px;
+    height: 6px;
+    width: 18%;
+    left: -18%;
     background: linear-gradient(
-      100deg,
+      90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0) 30%,
-      rgba(255, 248, 220, 0.85) 50%,
-      rgba(255, 255, 255, 0) 70%,
+      rgba(255, 250, 230, 0) 18%,
+      rgba(255, 250, 230, 0.9) 50%,
+      rgba(255, 250, 230, 0) 82%,
       transparent 100%
     );
-    animation: gleam 5.6s ease-in-out infinite;
+    -webkit-mask-image: linear-gradient(to bottom, #000 20%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 20%, transparent 100%);
+    animation: gleam 7.5s ease-in-out infinite;
   }
 }
 
 @keyframes gleam {
   0%,
-  58% {
-    transform: translateX(0);
+  68% {
+    transform: translateX(0) translateY(15px);
   }
-  82%,
+  84%,
   100% {
-    transform: translateX(380%);
+    transform: translateX(656%) translateY(-2px);
   }
 }
 
@@ -174,15 +202,11 @@
 }
 
 .prizeCard {
-  top: 558px;
-  height: 63px;
+  top: 302px;
+  left: 86px;
+  width: 114px;
+  height: 92px;
   cursor: pointer;
-
-  img {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
 
   &:focus-visible {
     outline: 3px solid #fff;
@@ -191,7 +215,7 @@
 }
 
 .giftCard {
-  top: 630px;
+  top: 518px;
   left: 0;
   width: 100%;
   height: 128px;
@@ -264,7 +288,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 10px;
   padding: 0 12px 0 10px;
   border-radius: 100px;
   border: 1px solid #c6a15a;
@@ -357,7 +381,7 @@
 }
 
 .playButton {
-  top: 754px;
+  top: 620px;
   left: calc((393px - 357px * 1.1) / 2);
   width: calc(357px * 1.1);
   height: auto;
@@ -452,6 +476,11 @@
   border-color: rgba(255, 246, 214, 0.95);
 }
 
+.globeHit,
+.prizeCard {
+  pointer-events: auto;
+}
+
 .globeHit {
   position: absolute;
   left: 52px;
@@ -530,6 +559,95 @@
   &:focus-visible {
     outline: 3px solid #fff;
     outline-offset: 2px;
+  }
+}
+
+.disco {
+  position: absolute;
+  left: 52px;
+  top: 124px;
+  z-index: 6;
+  width: 292px;
+  height: 292px;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(12, 4, 24, 0.22);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 86%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 86%);
+}
+
+.discoField {
+  position: absolute;
+  left: -22%;
+  top: -22%;
+  width: 144%;
+  height: 144%;
+  animation: discoSpin 0.9s linear infinite;
+}
+
+.discoFieldFast {
+  animation-duration: 0.55s;
+  animation-direction: reverse;
+}
+
+.discoSpot {
+  position: absolute;
+  border-radius: 50%;
+  animation: discoBlink 0.16s ease-in-out infinite alternate;
+}
+
+@keyframes discoSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes discoBlink {
+  from {
+    opacity: 0.28;
+    transform: scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+.discoToggle {
+  position: absolute;
+  top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  left: clamp(0px, calc(133 / 390 * 100vw), calc(133 / 390 * 600px));
+  z-index: 20;
+  width: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  height: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe7a3 0%, #f0b429 46%, #d39212 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+
+  svg {
+    width: 58%;
+    height: 58%;
+    display: block;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discoField,
+  .discoSpot,
+  .shinePlaque::after {
+    animation: none;
   }
 }
 
