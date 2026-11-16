@@ -222,6 +222,7 @@
   box-sizing: border-box;
   background: transparent;
   overflow: visible;
+  clip-path: inset(0 8px round 10px);
 }
 
 .giftCardArt {
@@ -235,7 +236,7 @@
 
 .liveCount {
   position: absolute;
-  left: calc(30.53% + 8px);
+  left: calc(19.83% + 8px);
   top: 33.1%;
   transform: translateY(-50%);
   color: #fff;
@@ -248,16 +249,16 @@
 
 .liveDay {
   position: absolute;
-  top: 22%;
-  width: 8.8%;
-  height: 15.6%;
-  object-fit: contain;
+  top: 22.22%;
+  width: 8.89%;
+  height: 15.38%;
+  object-fit: fill;
   pointer-events: none;
 }
 
-.liveDay1 { left: 49.9%; }
-.liveDay2 { left: 62.4%; }
-.liveDay3 { left: 74.9%; }
+.liveDay1 { left: 44.59%; }
+.liveDay2 { left: 57.09%; }
+.liveDay3 { left: 69.59%; }
 
 .flakeRow {
   position: absolute;
@@ -545,18 +546,20 @@
   width: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
   height: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
   padding: 0;
-  border: 0;
+  border: 2px solid transparent;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffe7a3 0%, #f0b429 46%, #d39212 100%);
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  background:
+    linear-gradient(#e3b258, #e3b258) padding-box,
+    linear-gradient(160deg, #fffef2 0%, #ffe8b4 42%, #ffe384 100%) border-box;
+  color: #aa4c01;
+  box-shadow: none;
   cursor: pointer;
   display: grid;
   place-items: center;
   font-weight: 800;
   font-size: clamp(22px, calc(26 / 390 * 100vw), calc(26 / 390 * 600px));
   line-height: 1;
-  text-shadow: 0 1px 0 rgba(120, 72, 8, 0.35);
+  text-shadow: none;
 
   &:focus-visible {
     outline: 3px solid #fff;
@@ -578,7 +581,7 @@
   color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   cursor: pointer;
-  display: grid;
+  display: none;
   place-items: center;
 
   svg {
@@ -660,7 +663,7 @@
   color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
   cursor: pointer;
-  display: grid;
+  display: none;
   place-items: center;
 
   svg {
@@ -705,5 +708,26 @@
   img {
     width: 100%;
     height: 100%;
+  }
+}
+
+.musicCredit {
+  position: absolute;
+  z-index: 20;
+  top: clamp(68px, calc(69 / 390 * 100vw), calc(69 / 390 * 600px));
+  right: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  width: 104px;
+  margin: 0;
+  color: rgba(255, 248, 236, 0.46);
+  font-size: 7px;
+  line-height: 1.2;
+  text-align: right;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    pointer-events: auto;
   }
 }

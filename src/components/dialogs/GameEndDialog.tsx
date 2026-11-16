@@ -65,28 +65,32 @@ const GameEndDialog: React.FC<GameEndDialogProps> = ({
   return (
     <Dialog open={open} className={styles.root}>
       <div className={styles.controlsContainer}>
-        <button
-          type="button"
-          className={styles.controlButton}
-          onClick={onBackToMenu}
-        >
-          <AppImage src={gameConfig.assets.ui.menuButton} alt="Menu button" />
-        </button>
+        <div className={styles.leading}>
+          <button
+            type="button"
+            className={styles.controlButton}
+            onClick={onBackToMenu}
+          >
+            <AppImage src={gameConfig.assets.ui.menuButton} alt="Menu button" />
+          </button>
+        </div>
 
-        <button
-          type="button"
-          className={styles.controlButton}
-          onClick={() => setAudioOn(!audioOn)}
-        >
-          {audioOn ? (
-            <AppImage src={gameConfig.assets.ui.audioOnButton} alt="Audio on" />
-          ) : (
-            <AppImage
-              src={gameConfig.assets.ui.audioOffButton}
-              alt="Audio off"
-            />
-          )}
-        </button>
+        <div className={styles.trailing}>
+          <button
+            type="button"
+            className={styles.controlButton}
+            onClick={() => setAudioOn(!audioOn)}
+          >
+            {audioOn ? (
+              <AppImage src={gameConfig.assets.ui.audioOnButton} alt="Audio on" />
+            ) : (
+              <AppImage
+                src={gameConfig.assets.ui.audioOffButton}
+                alt="Audio off"
+              />
+            )}
+          </button>
+        </div>
       </div>
 
       <AppImage

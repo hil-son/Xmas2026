@@ -1,84 +1,156 @@
 .root:global(.MuiDialog-root) {
+  :global(.MuiBackdrop-root) {
+    background-color: #000000b2;
+    backdrop-filter: blur(16px);
+  }
+
   :global(.MuiDialog-container) {
     align-items: center;
     justify-content: center;
+    overflow: visible;
   }
 
   :global(.MuiPaper-root) {
-    justify-content: center;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+    max-width: none;
+    height: auto !important;
+    min-height: 0 !important;
   }
 }
 
-.titleImage {
+.frame {
+  --s: calc(80vw * 390 / 397);
   position: relative;
-  width: clamp(0px, calc(148 * 0.7 / 390 * 100vw), calc(148 * 0.7 / 390 * 600px));
-  margin-bottom: 0;
+  width: calc(440 / 390 * var(--s));
+  height: calc(470 / 390 * var(--s));
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  color: #fff;
 }
 
-.scroller {
+.card {
   position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.copy {
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  box-sizing: border-box;
+  width: calc(397 / 390 * var(--s));
+  height: calc(451 / 390 * var(--s));
+  border: calc(12 / 390 * var(--s)) solid #123f35;
+  border-radius: calc(24 / 390 * var(--s));
+  background: rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
-  padding-right: 14px;
-  box-sizing: border-box;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  padding: calc(20 / 390 * var(--s)) calc(10 / 390 * var(--s));
+  gap: calc(19 / 390 * var(--s));
 }
 
-.track {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 16px;
-  height: 100%;
+.copy {
   display: flex;
-  justify-content: flex-end;
-  cursor: pointer;
-  touch-action: none;
-}
-
-.rail {
-  position: relative;
-  width: 6px;
-  height: 100%;
-  border-radius: 100px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.thumb {
-  position: absolute;
-  left: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(10 / 390 * var(--s));
   width: 100%;
-  border-radius: 100px;
-  background: #fff;
-  cursor: grab;
-  touch-action: none;
+  text-align: center;
+}
 
-  &:active {
-    cursor: grabbing;
+.title {
+  margin: 0;
+  font-size: calc(24 / 390 * var(--s));
+  font-weight: 800;
+  line-height: normal;
+}
+
+.lead {
+  width: calc(269 / 390 * var(--s));
+  margin: 0;
+  font-size: calc(16 / 390 * var(--s));
+  font-weight: 500;
+  line-height: normal;
+
+  strong {
+    font-weight: 700;
   }
 }
 
-.description {
-  margin: clamp(0px, calc(4 / 390 * 100vw), calc(4 / 390 * 600px)) 0 0 !important;
-  font-size: clamp(11px, calc(13 / 390 * 100vw), calc(13 / 390 * 600px)) !important;
-  line-height: 1.35 !important;
-  font-weight: 400 !important;
-  color: #fff;
+.mark {
+  font-size: calc(10.32 / 390 * var(--s));
+  font-weight: 500;
+}
+
+.period {
+  margin: 0;
+  font-size: calc(14 / 390 * var(--s));
+  font-weight: 700;
+  line-height: normal;
+}
+
+.banner {
+  width: calc(261 / 390 * var(--s));
+  height: calc(130 / 390 * var(--s));
+  box-sizing: border-box;
+  flex-shrink: 0;
+  border: calc(3 / 390 * var(--s)) solid #cea272;
+  border-radius: calc(10 / 390 * var(--s));
+  overflow: hidden;
+  box-shadow:
+    0 calc(1 / 390 * var(--s)) 0 rgba(6, 6, 6, 0.25),
+    0 0 calc(8 / 390 * var(--s)) rgba(0, 68, 163, 0.25);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.ok {
+  width: calc(353 / 390 * var(--s));
+  height: calc(70 / 390 * var(--s));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.terms {
+  margin: -10px 0 0;
+  width: 100%;
+  font-size: calc(10 / 390 * var(--s));
+  font-weight: 400;
+  line-height: normal;
   text-align: center;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}
+
+.card > .close {
+  top: calc(-12 / 390 * var(--s));
+  right: auto;
+  left: calc(-12 / 390 * var(--s));
+  transform: translate(-45%, -45%);
+}
+
+.deco {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  pointer-events: none;
+}
+
+.flip {
+  transform: scaleX(-1);
 }

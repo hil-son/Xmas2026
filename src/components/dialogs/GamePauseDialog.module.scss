@@ -32,11 +32,17 @@
 }
 
 .controlsContainer {
+  position: relative;
   margin-bottom: clamp(0px, calc(8 / 390 * 100vw), calc(8 / 390 * 600px));
   width: 100%;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
+  gap: 8px;
+}
+
+.controlsContainer > .close {
+  position: static;
 }
 
 .controlButton {

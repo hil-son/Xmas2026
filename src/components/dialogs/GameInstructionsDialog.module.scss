@@ -21,6 +21,17 @@
   }
 }
 
+.sheet {
+  position: relative;
+}
+
+.sheet > .close {
+  top: 13px;
+  right: auto;
+  left: calc((100% - (105% * 0.75)) / 2);
+  transform: none;
+}
+
 .titleImage {
   position: relative;
   display: block;

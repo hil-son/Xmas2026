@@ -33,11 +33,19 @@
   width: 100%;
   aspect-ratio: 372 / 136;
   flex-shrink: 0;
-  background: #123f35;
-  border-radius: calc(10 / 372 * 100%) calc(10 / 372 * 100%) 0 0;
+  background: transparent;
   overflow: hidden;
   container-type: inline-size;
   z-index: 3;
+
+  &::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 8px;
+    background: #123f35;
+    border-radius: 10px 10px 0 0;
+  }
 }
 
 .flakeRowTop,

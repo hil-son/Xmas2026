@@ -32,6 +32,21 @@
   }
 }
 
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.sheet > .close {
+  top: -7px;
+  right: auto;
+  left: calc((100% - (105% * 0.75)) / 2);
+  transform: none;
+}
+
 .checkInDayBox {
   width: 100%;
   margin-bottom: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));

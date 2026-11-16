@@ -1,147 +1,152 @@
-import { Dialog, Typography } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dialog } from "@mui/material";
+import { Noto_Sans } from "next/font/google";
 import AppImage from "@components/AppImage";
+import PopupCloseButton from "@components/dialogs/PopupCloseButton";
 import { gameConfig } from "@config/gameConfig";
-import styles from "@components/dialogs/GameEndDialog.module.scss";
-import detailStyles from "./PrizeDetailsDialog.module.scss";
+import styles from "./PrizeDetailsDialog.module.scss";
 
 interface PrizeDetailsDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
-const PrizeDetailsDialog: React.FC<PrizeDetailsDialogProps> = ({ open, onClose }) => {
-  const copyRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ startY: number; startScroll: number } | null>(null);
-  const [thumb, setThumb] = useState({ visible: false, height: 0, top: 0 });
+const detailFont = Noto_Sans({
+  weight: ["400", "500", "700", "800"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
-  const updateThumb = useCallback(() => {
-    const el = copyRef.current;
-    if (!el) return;
-    const overflow = el.scrollHeight - el.clientHeight;
-    if (overflow <= 1) {
-      setThumb({ visible: false, height: 0, top: 0 });
-      return;
-    }
-    const height = Math.max(28, (el.clientHeight / el.scrollHeight) * el.clientHeight);
-    const top = (el.scrollTop / overflow) * (el.clientHeight - height);
-    setThumb({ visible: true, height, top });
-  }, []);
+const asset = (file: string) => `${gameConfig.basePath}/images/prize-details/${file}`;
 
-  useEffect(() => {
-    if (!open) return;
-    const frame = requestAnimationFrame(updateThumb);
-    window.addEventListener("resize", updateThumb);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", updateThumb);
-    };
-  }, [open, updateThumb]);
+const bulbSize: Record<string, [number, number]> = {
+  "bulb-2412.svg": [28.974, 34.461],
+  "bulb-2413.svg": [32.1093, 28.9739],
+  "bulb-2414.svg": [32.1093, 28.9739],
+  "bulb-2415.svg": [31.1532, 30.1079],
+  "bulb-2416.svg": [32.1093, 28.9739],
+  "bulb-2417.svg": [31.1532, 30.1079],
+  "bulb-2418.svg": [32.1093, 28.9739],
+  "bulb-2419.svg": [28.974, 34.461],
+  "bulb-2420.svg": [32.1093, 28.9739],
+  "bulb-2421.svg": [31.1532, 30.1079],
+  "bulb-2422.svg": [32.1093, 28.9739],
+  "bulb-2423.svg": [31.1532, 30.1079],
+  "bulb-2424.svg": [32.1093, 28.9739],
+  "bulb-2425.svg": [28.974, 34.461],
+};
 
-  const onThumbPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const el = copyRef.current;
-    if (!el) return;
-    event.preventDefault();
-    event.stopPropagation();
-    dragRef.current = { startY: event.clientY, startScroll: el.scrollTop };
-    try {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } catch {
-      // Drag still follows pointermove events when capture is unavailable.
-    }
-  };
+// Figma bounding boxes. Bulb art includes a glow, so each image is centered on its box.
+const bulbs: Array<[string, number, number, number, number]> = [
+  ["bulb-2414.svg", 18, 13, 19, 18],
+  ["bulb-2415.svg", 9, 52, 25, 24],
+  ["bulb-2413.svg", 8, 111, 18, 19],
+  ["bulb-2412.svg", -13, 159, 20, 15],
+  ["bulb-2414.svg", -8, 218, 19, 18],
+  ["bulb-2415.svg", -17, 257, 25, 24],
+  ["bulb-2413.svg", -6, 316, 18, 19],
+  ["bulb-2412.svg", -9, 364, 20, 15],
+  ["bulb-2414.svg", 15, 408, 19, 18],
+  ["bulb-2415.svg", 9, 447, 25, 24],
+  ["bulb-2416.svg", 368, 2, 17, 19],
+  ["bulb-2417.svg", 355, 52, 17, 18],
+  ["bulb-2418.svg", 368, 97, 19, 19],
+  ["bulb-2419.svg", 377, 156, 16, 21],
+  ["bulb-2420.svg", 390, 215, 18, 19],
+  ["bulb-2421.svg", 379, 262, 23, 23],
+  ["bulb-2424.svg", 390, 308, 19, 16],
+  ["bulb-2425.svg", 366, 364, 21, 17],
+  ["bulb-2422.svg", 370, 408, 15, 18],
+  ["bulb-2423.svg", 352, 441, 20, 21],
+];
 
-  const onThumbPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    const el = copyRef.current;
-    if (!drag || !el) return;
-    const overflow = el.scrollHeight - el.clientHeight;
-    const travel = el.clientHeight - thumb.height;
-    if (overflow <= 0 || travel <= 0) return;
-    el.scrollTop = drag.startScroll + ((event.clientY - drag.startY) / travel) * overflow;
-  };
+function place(px: number) {
+  return `calc(${px} / 390 * var(--s))`;
+}
 
-  const onThumbPointerUp = () => {
-    dragRef.current = null;
-  };
-
-  const onTrackPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const el = copyRef.current;
-    if (!el) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const ratio = (event.clientY - rect.top) / rect.height;
-    el.scrollTop = ratio * (el.scrollHeight - el.clientHeight) - el.clientHeight / 2;
-  };
-
+function Deco({
+  file,
+  x,
+  y,
+  w,
+  h,
+  flip = false,
+}: {
+  file: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  flip?: boolean;
+}) {
   return (
-    <Dialog open={open} onClose={onClose} className={`${styles.root} ${detailStyles.root}`}>
-      <AppImage
-        src={gameConfig.assets.ui.giftBoxIcon}
-        className={detailStyles.titleImage}
-        alt=""
-      />
+    <img
+      src={asset(file)}
+      alt=""
+      className={flip ? `${styles.deco} ${styles.flip}` : styles.deco}
+      style={{ left: place(x), top: place(y), width: place(w), height: place(h) }}
+    />
+  );
+}
 
-      <div className={styles.resultContainer}>
-        <AppImage
-          src={gameConfig.assets.ui.endDialogGiftBoxBg}
-          className={styles.resultContainerBg}
-          alt=""
-        />
-        <div className={styles.resultContent}>
-          <div className={detailStyles.scroller}>
-            <div className={detailStyles.copy} ref={copyRef} onScroll={updateThumb}>
-              <div>
-                <Typography>Park&apos;n Shop Voucher</Typography>
-                <Typography className={detailStyles.description}>
-                  This is dummy description text for the prize details popup. Grab a gift box in
-                  Christmas Crush for a chance to win a Park&apos;n Shop voucher during the holiday
-                  campaign. Play from the first of December through the eighteenth and collect gift
-                  boxes as you match items on the board. Check in for three days in a row to earn
-                  thirty extra Gift boxes on the third day. Voucher winners are drawn after the
-                  campaign ends. Please replace this placeholder with the final prize terms, dates,
-                  and eligibility notes before the event launches for players across the holiday
-                  season today.
-                </Typography>
-              </div>
-              <Typography className={styles.scoreNumText}>1–18 Dec</Typography>
-              <div>
-                <Typography>3-day check-in</Typography>
-                <div className={styles.giftNumberContainer}>
-                  <AppImage
-                    src={gameConfig.assets.ui.giftBoxIcon}
-                    alt=""
-                    className={styles.giftBoxIcon}
-                  />
-                  <Typography className={styles.giftNumText}>+30</Typography>
-                </div>
-              </div>
-            </div>
-            {thumb.visible && (
-              <div className={detailStyles.track} onPointerDown={onTrackPointerDown}>
-                <div className={detailStyles.rail}>
-                  <div
-                    className={detailStyles.thumb}
-                    role="scrollbar"
-                    aria-orientation="vertical"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.round((thumb.top / Math.max(1, (copyRef.current?.clientHeight ?? 0) - thumb.height)) * 100)}
-                    style={{ height: thumb.height, transform: `translateY(${thumb.top}px)` }}
-                    onPointerDown={onThumbPointerDown}
-                    onPointerMove={onThumbPointerMove}
-                    onPointerUp={onThumbPointerUp}
-                    onPointerCancel={onThumbPointerUp}
-                  />
-                </div>
-              </div>
-            )}
+const PrizeDetailsDialog: React.FC<PrizeDetailsDialogProps> = ({ open, onClose }) => {
+  return (
+    <Dialog open={open} onClose={onClose} className={styles.root}>
+      <div className={`${styles.frame} ${detailFont.className}`}>
+        <div className={styles.card}>
+          <PopupCloseButton onClick={onClose} className={styles.close} />
+          <div className={styles.copy}>
+            <h2 className={styles.title}>Game Details</h2>
+            <p className={styles.lead}>
+              Collect the most <strong>Gift Box</strong> to win Park’n Shop Voucher<span className={styles.mark}>*</span>!
+            </p>
+            <p className={styles.period}>
+              Game period:
+              <br />
+              23 Nov to 21 Dec 2026
+            </p>
           </div>
+
+          <div className={styles.banner}>
+            <img src={asset("banner.jpg")} alt="" />
+          </div>
+
+          <button type="button" className={styles.ok} onClick={onClose}>
+            <AppImage src={gameConfig.assets.ui.okButton} alt="OK" />
+          </button>
+
+          <p className={styles.terms}>
+            <a href="https://web.three.com.hk/tnc/261123/tnc-xmas-crush-en.pdf" target="_blank" rel="noreferrer">
+              Terms and conditions apply.
+            </a>
+          </p>
+
+          <Deco file="wire.svg" x={-5} y={0} w={31} h={450} />
+          <Deco file="wire.svg" x={366} y={0} w={31} h={450} flip />
+          {bulbs.map(([file, x, y, w, h], index) => {
+            const [sw, sh] = bulbSize[file];
+            return (
+              <Deco
+                key={`${file}-${index}`}
+                file={file}
+                x={x + w / 2 - sw / 2}
+                y={y + h / 2 - sh / 2}
+                w={sw}
+                h={sh}
+              />
+            );
+          })}
+          <Deco file="sparkle-title.svg" x={80} y={21} w={28} h={28} />
+          <Deco file="sparkle-photo.svg" x={323} y={165} w={23} h={23} />
+          <Deco file="string-left.svg" x={49} y={1} w={1} h={46} />
+          <Deco file="bauble.svg" x={37} y={50} w={26} h={26} />
+          <Deco file="bauble-cap.svg" x={46} y={47} w={9} h={5} />
+          <Deco file="string-right.svg" x={343} y={1} w={2} h={47} />
+          <Deco file="bauble-right.svg" x={329} y={51} w={28} h={27} />
+          <Deco file="bauble-right-cap.svg" x={339} y={48} w={10} h={5} />
+          <Deco file="bauble-right-tip.svg" x={343} y={68} w={13} h={12} />
+          <Deco file="star.svg" x={49} y={297} w={31} h={31} />
         </div>
       </div>
-
-      <button type="button" className={styles.button} onClick={onClose}>
-        <AppImage src={gameConfig.assets.ui.okButton} alt="Close" />
-      </button>
     </Dialog>
   );
 };

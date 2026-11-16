@@ -40,6 +40,13 @@
   align-items: center;
 }
 
+.leading,
+.trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .controlButton {
   top: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
   right: clamp(0px, calc(20 / 390 * 100vw), calc(20 / 390 * 600px));
@@ -153,7 +160,7 @@
   }
 
   .giftNumText {
-    font-family: var(--font-allround-gothic), "Noto Sans TC", sans-serif !important;
+    font-family: var(--font-nunito), "Noto Sans TC", sans-serif !important;
     font-weight: 700 !important;
     font-size: clamp(
       32px,

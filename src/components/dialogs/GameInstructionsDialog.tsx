@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@mui/material";
 import AppImage from "@components/AppImage";
+import PopupCloseButton from "./PopupCloseButton";
 import styles from "./GameInstructionsDialog.module.scss";
 import { gameConfig } from "@config/gameConfig";
 import Typography from "@mui/material/Typography";
@@ -66,7 +67,8 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
       onClose={onClose}
       className={styles.root}
     >
-      <DialogContent>
+      <DialogContent className={styles.sheet}>
+        <PopupCloseButton onClick={onClose} className={styles.close} />
         <Swiper
           spaceBetween={30}
           pagination={{

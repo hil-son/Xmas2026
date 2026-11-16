@@ -21,10 +21,15 @@ interface LandingProps {
 const valueFont = Montserrat_Alternates({ weight: "700", subsets: ["latin"], display: "swap" });
 
 const coverSrc = `${gameConfig.basePath}/images/cover.png`;
+const genericCoverSrc = `${gameConfig.basePath}/images/cover-generic.png`;
 const pugSrc = `${gameConfig.basePath}/images/pug.png`;
+// Campaign art stays up through 21 Dec 2026. Hong Kong has no daylight saving.
+const CAMPAIGN_COVER_ENDS = Date.parse("2026-12-22T00:00:00+08:00");
+// setTimeout delay is a 32-bit signed integer, so anything past ~24.8 days fires immediately.
+const COVER_CHECK_MS = 24 * 60 * 60 * 1000;
 const playSrc = `${gameConfig.basePath}/images/cover-play.png?v=lights`;
 const cardBase = `${gameConfig.basePath}/images/covercard`;
-const giftCardSrc = `${gameConfig.basePath}/images/cover-gift-card.png?v=cardspace`;
+const giftCardSrc = `${gameConfig.basePath}/images/cover-gift-card.png?v=closegap`;
 
 type FxKey = "snow" | "pump" | "blink" | "tail";
 
@@ -114,7 +119,9 @@ const Landing: React.FC<LandingProps> = ({
   const globeRef = useRef<HTMLCanvasElement>(null);
   const pugRef = useRef<HTMLCanvasElement>(null);
   const [scale, setScale] = useState(1);
+  const [genericCover, setGenericCover] = useState(() => Date.now() >= CAMPAIGN_COVER_ENDS);
   const [prizeOpen, setPrizeOpen] = useState(false);
+  const plateSrc = genericCover ? genericCoverSrc : coverSrc;
   const playRef = useRef<HTMLButtonElement>(null);
   const fxRef = useRef<CoverFx>({
     snow: true,
@@ -146,6 +153,24 @@ const Landing: React.FC<LandingProps> = ({
     observer.observe(parent);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (genericCover) {
+      setPrizeOpen(false);
+      return;
+    }
+    let timer = 0;
+    const checkCover = () => {
+      const remaining = CAMPAIGN_COVER_ENDS - Date.now();
+      if (remaining <= 0) {
+        setGenericCover(true);
+        return;
+      }
+      timer = window.setTimeout(checkCover, Math.min(remaining, COVER_CHECK_MS));
+    };
+    checkCover();
+    return () => window.clearTimeout(timer);
+  }, [genericCover]);
 
   useEffect(() => {
     const lights = lightsRef.current;
@@ -294,7 +319,7 @@ const Landing: React.FC<LandingProps> = ({
         }}
       >
         <div className={styles.scene}>
-          <img className={styles.plate} src={coverSrc} alt="" />
+          <img className={styles.plate} src={plateSrc} alt="" />
           <div className={styles.lights} ref={lightsRef} />
           <canvas className={styles.pugLive} ref={pugRef} />
           <canvas className={styles.globeSnow} ref={globeRef} width={292} height={292} />
@@ -328,14 +353,16 @@ const Landing: React.FC<LandingProps> = ({
             aria-label="Swirl the snow globe"
             onPointerDown={stirGlobe}
           />
-          <button
-            type="button"
-            className={styles.prizeCard}
-            onClick={() => setPrizeOpen(true)}
-            aria-label="Prize details"
-          />
+          {!genericCover && (
+            <button
+              type="button"
+              className={styles.prizeCard}
+              onClick={() => setPrizeOpen(true)}
+              aria-label="Prize details"
+            />
+          )}
         </div>
-        <img className={styles.plateExtend} src={coverSrc} alt="" />
+        <img className={styles.plateExtend} src={plateSrc} alt="" />
         <canvas className={styles.snow} ref={snowRef} width={STAGE_W} height={STAGE_H} />
         <div className={styles.giftCard}>
           <img className={styles.giftCardArt} src={giftCardSrc} alt="" />
@@ -431,7 +458,19 @@ const Landing: React.FC<LandingProps> = ({
           <AppImage src={gameConfig.assets.ui.audioOffButton} alt="Audio off" />
         )}
       </button>
-      <PrizeDetailsDialog open={prizeOpen} onClose={() => setPrizeOpen(false)} />
+      <p className={styles.musicCredit}>
+        <a href="https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100365" target="_blank" rel="noreferrer">
+          Up on the Housetop
+        </a>
+        <br />
+        Kevin MacLeod ·{" "}
+        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
+          CC BY 4.0
+        </a>
+      </p>
+      {!genericCover && (
+        <PrizeDetailsDialog open={prizeOpen} onClose={() => setPrizeOpen(false)} />
+      )}
     </div>
   );
 };

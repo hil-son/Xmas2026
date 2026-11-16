@@ -1,0 +1,29 @@
+.close {
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  left: 0;
+  width: clamp(36px, calc(40 / 390 * 100vw), calc(40 / 390 * 600px));
+  height: clamp(36px, calc(40 / 390 * 100vw), calc(40 / 390 * 600px));
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background:
+    linear-gradient(#e3b258, #e3b258) padding-box,
+    linear-gradient(160deg, #fffef2 0%, #ffe8b4 42%, #ffe384 100%) border-box;
+  color: #aa4c01;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+
+  svg {
+    width: 48%;
+    height: 48%;
+    display: block;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+}

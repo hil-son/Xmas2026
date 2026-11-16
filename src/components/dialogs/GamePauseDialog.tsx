@@ -1,5 +1,6 @@
 import { Dialog } from "@mui/material";
 import AppImage from "@components/AppImage";
+import PopupCloseButton from "./PopupCloseButton";
 import styles from "./GamePauseDialog.module.scss";
 import { gameConfig } from "@config/gameConfig";
 
@@ -23,6 +24,7 @@ const GamePauseDialog: React.FC<GamePauseDialogProps> = ({
   return (
     <Dialog open={open} className={styles.root}>
       <div className={styles.controlsContainer}>
+        <PopupCloseButton onClick={onResumeGame} className={styles.close} />
         <button
           type="button"
           className={styles.controlButton}

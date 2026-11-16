@@ -2,6 +2,7 @@ import { Dialog, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import styles from "./GameCheckInEndDialog.module.scss";
 import AppImage from "@components/AppImage";
+import PopupCloseButton from "./PopupCloseButton";
 import { gameConfig } from "@config/gameConfig";
 
 interface GameCheckInEndDialogProps {
@@ -33,6 +34,8 @@ const GameEndDialog: React.FC<GameCheckInEndDialogProps> = ({
 
   return (
     <Dialog open={open} className={styles.root}>
+      <div className={styles.sheet}>
+      <PopupCloseButton onClick={onNextEndDialog} className={styles.close} />
       <AppImage
         src={checkInDayTopBanner}
         className={styles.titleImage}
@@ -73,6 +76,7 @@ const GameEndDialog: React.FC<GameCheckInEndDialogProps> = ({
           alt="Play again button"
         />
       </button>
+      </div>
     </Dialog>
   );
 };

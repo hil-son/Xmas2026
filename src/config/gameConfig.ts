@@ -82,9 +82,11 @@ export const gameConfig = {
   // SOUND CONFIGURATION
   // ==========================================
   sounds: {
-    // Background music: Away in a Manger, United States Marine Band. Public domain.
+    // "Up on the Housetop" by Kevin MacLeod (incompetech.com)
+    // Licensed under Creative Commons: By Attribution 4.0
+    // https://creativecommons.org/licenses/by/4.0/
     background: {
-      path: `${basePath}/sounds/background.m4a?v=lovedones`,
+      path: `${basePath}/sounds/background.m4a?v=housetop`,
       volume: 0.5,
     },
 
