@@ -349,17 +349,16 @@
   .gameGiftNumberContainer {
     position: absolute;
     top: 50%;
-    left: 86%;
-    transform: translate(-50%, -50%);
+    left: calc(81.92% + clamp(0px, calc(8 / 390 * 100vw), calc(8 / 390 * 600px)));
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-width: 1.4em;
-    background: #0d3027;
+    justify-content: flex-start;
 
     .giftNumText {
-      font-family: var(--font-allround-gothic), "Noto Sans TC", sans-serif !important;
-      font-weight: 500 !important;
+      font-family: var(--font-montserrat-alternates), sans-serif !important;
+      font-weight: 700 !important;
+      font-synthesis: none;
       font-size: clamp(
         0px,
         calc(16 / 390 * 100vw),

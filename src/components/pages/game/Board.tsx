@@ -35,8 +35,13 @@ const Board: React.FC<BoardProps> = ({
   const [isFreezing, setIsFreezing] = useState(true);
   const cellRefs = useRef<{ [key: string]: HTMLDivElement }>({});
   const initialClear = useRef(true);
+  const boardRef = useRef<Item[][]>([]);
 
   const audioOnRef = useRef(audioOn);
+
+  useEffect(() => {
+    boardRef.current = board;
+  }, [board]);
 
   useEffect(() => {
     audioOnRef.current = audioOn;
@@ -240,7 +245,7 @@ const Board: React.FC<BoardProps> = ({
     return virtualBoard;
   };
 
-  const findMatches = (boardToCheck: Item[][] = board) => {
+  const findMatches = (boardToCheck: Item[][] = boardRef.current) => {
     const matches: { row: number; col: number }[] = [];
 
     // Check rows for matches
@@ -284,22 +289,25 @@ const Board: React.FC<BoardProps> = ({
     return uniqueMatches;
   };
 
-  const handleMatches = (matches: { row: number; col: number }[]) => {
+  const handleMatches = (
+    matches: { row: number; col: number }[],
+    sourceBoard: Item[][] = boardRef.current
+  ) => {
     if (matches.length > 0) {
       if (audioOnRef.current) {
         matchSound.play();
       }
     }
 
-    const newBoard = [...board];
+    const newBoard = sourceBoard.map((row) => row.map((item) => ({ ...item })));
 
-    // Count cleared gift boxes
+    // Count cleared gift boxes, including matches made by falling pieces.
     let specialItemCount = 0;
 
     // Mark matched items
     matches.forEach(({ row, col }) => {
       newBoard[row][col] = { ...newBoard[row][col], isMatched: true };
-      if (board[row][col].type === specialItemType) {
+      if (sourceBoard[row][col].type === specialItemType) {
         specialItemCount++;
       }
     });
@@ -309,12 +317,13 @@ const Board: React.FC<BoardProps> = ({
       onSpecialItemMatch(specialItemCount);
     }
 
+    boardRef.current = newBoard;
     setBoard(newBoard);
     onMatch(matches.length);
 
     // Replace matched items after a delay
     setTimeout(() => {
-      replaceMatches(matches);
+      replaceMatches(matches, newBoard);
     }, 350);
 
     // Hide matched cells by setting their opacity to 0
@@ -338,8 +347,11 @@ const Board: React.FC<BoardProps> = ({
     return fallbackHeight;
   };
 
-  const replaceMatches = async (matches: { row: number; col: number }[]) => {
-    const newBoard = [...board];
+  const replaceMatches = async (
+    matches: { row: number; col: number }[],
+    sourceBoard: Item[][] = boardRef.current
+  ) => {
+    const newBoard = sourceBoard.map((row) => row.map((item) => ({ ...item })));
 
     // const dropEase = "bounce.out"; // Original GSAP bounce
     const dropEase = "power3.out";
@@ -514,6 +526,7 @@ const Board: React.FC<BoardProps> = ({
       }
     }
 
+    boardRef.current = newBoard;
     setBoard(newBoard);
 
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -670,11 +683,11 @@ const Board: React.FC<BoardProps> = ({
       placeholder.remove();
     });
 
-    // Check for additional matches after replacements
+    // Falling pieces can line up a match without another move. Score those too.
     setTimeout(() => {
-      const matches = findMatches();
-      if (matches.length > 0) {
-        handleMatches(matches);
+      const chainMatches = findMatches(newBoard);
+      if (chainMatches.length > 0) {
+        handleMatches(chainMatches, newBoard);
       }
     }, 32);
   };
@@ -801,10 +814,13 @@ const Board: React.FC<BoardProps> = ({
             // Check if the swap resulted in a match using pre-calculated results
             if (potentialMatches.length > 0) {
               // Only update the board state if the swap is valid
-              const newBoard = [...board];
+              const newBoard = boardRef.current.map((row) =>
+                row.map((item) => ({ ...item }))
+              );
               const tempType = newBoard[row1][col1].type;
               newBoard[row1][col1].type = newBoard[row2][col2].type;
               newBoard[row2][col2].type = tempType;
+              boardRef.current = newBoard;
               setBoard(newBoard);
 
               // Delay showing the original cells to prevent flickering
@@ -819,7 +835,7 @@ const Board: React.FC<BoardProps> = ({
 
                 // Additional delay before handling matches to ensure smooth transition
                 setTimeout(() => {
-                  handleMatches(potentialMatches);
+                  handleMatches(potentialMatches, newBoard);
                 }, 50);
               }, 32);
             }

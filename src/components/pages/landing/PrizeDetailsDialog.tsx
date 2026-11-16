@@ -74,10 +74,10 @@ const PrizeDetailsDialog: React.FC<PrizeDetailsDialogProps> = ({ open, onClose }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} className={styles.root}>
+    <Dialog open={open} onClose={onClose} className={`${styles.root} ${detailStyles.root}`}>
       <AppImage
         src={gameConfig.assets.ui.giftBoxIcon}
-        className={styles.titleImage}
+        className={detailStyles.titleImage}
         alt=""
       />
 

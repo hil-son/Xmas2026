@@ -201,7 +201,7 @@ export const gameConfig = {
       giftBoxIcon: `${basePath}/images/xmas-giftbox-2.png?v=goldgift`,
       endDialogTopGift: `${basePath}/images/xmas-giftbox-top.png?v=stars`,
 
-      gameBottomGiftNumBar: `${basePath}/images/game-gift-box-bar.png?v=goldgift`,
+      gameBottomGiftNumBar: `${basePath}/images/game-gift-box-bar.png?v=gap8`,
 
       endDialogGiftBoxBg: `${basePath}/images/end-dialog-gift-box-bg.png?v=frame`,
     },

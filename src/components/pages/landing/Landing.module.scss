@@ -235,16 +235,14 @@
 
 .liveCount {
   position: absolute;
-  left: 31.5%;
-  top: 30.8%;
-  width: 8.4%;
-  height: 6.8%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  left: calc(30.53% + 8px);
+  top: 33.1%;
+  transform: translateY(-50%);
   color: #fff;
   font-size: 13px;
+  font-weight: 700;
   line-height: 1;
+  white-space: nowrap;
   pointer-events: none;
 }
 

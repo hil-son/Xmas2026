@@ -1,3 +1,20 @@
+.root:global(.MuiDialog-root) {
+  :global(.MuiDialog-container) {
+    align-items: center;
+    justify-content: center;
+  }
+
+  :global(.MuiPaper-root) {
+    justify-content: center;
+  }
+}
+
+.titleImage {
+  position: relative;
+  width: clamp(0px, calc(148 * 0.7 / 390 * 100vw), calc(148 * 0.7 / 390 * 600px));
+  margin-bottom: 0;
+}
+
 .scroller {
   position: relative;
   width: 100%;

@@ -26,6 +26,7 @@ const scoreValueFont = Montserrat_Alternates({
   weight: "700",
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-montserrat-alternates",
 });
 
 const topFlakes = "ababababadededededadededededededed";
@@ -504,16 +505,28 @@ const Game: React.FC<GameProps> = ({
     router.push("/leaderboard.jsp?req_d=my3");
   };
 
+  const shownGiftRef = useRef(tempSpecialItemPoint);
+  const lastGiftPropRef = useRef(tempSpecialItemPoint);
+  if (tempSpecialItemPoint !== lastGiftPropRef.current) {
+    lastGiftPropRef.current = tempSpecialItemPoint;
+    if (
+      tempSpecialItemPoint > shownGiftRef.current ||
+      tempSpecialItemPoint === 0
+    ) {
+      shownGiftRef.current = tempSpecialItemPoint;
+    }
+  }
+
   const handleSpecialItemMatch = (count: number) => {
-    if (gameState.isGameOver) return;
-    
-    console.log(`Special item matched ${count} times`);
+    if (count <= 0 || gameState.isGameOver) return;
+
     setGameState((prev: GameState) => ({
       ...prev,
       specialItemMatchNum: prev.specialItemMatchNum + count,
-      // timeLeft will be updated by the timer with bonus included
     }));
-    setTempSpecialItemPoint?.(tempSpecialItemPoint + count);
+    // A falling match can score again before React renders the last total.
+    shownGiftRef.current += count;
+    setTempSpecialItemPoint?.(shownGiftRef.current);
   };
 
   const onNextEndDialog = () => {
@@ -706,7 +719,9 @@ const Game: React.FC<GameProps> = ({
           />
 
           <div className={styles.gameGiftNumberContainer}>
-            <Typography className={styles.giftNumText}>
+            <Typography
+              className={`${styles.giftNumText} ${scoreValueFont.className} ${scoreValueFont.variable}`}
+            >
               {formatNumberWithCommas(tempSpecialItemPoint)}
             </Typography>
           </div>
