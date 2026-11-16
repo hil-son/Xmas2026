@@ -182,7 +182,7 @@ export const gameConfig = {
       // Game elements
       itemHighlightBorder: `${basePath}/images/item-highlight-border.png`,
       itemHighlightStar: `${basePath}/images/item-highlight-star.png`,
-      instructionsAnimation: `${basePath}/images/instructions-animation-xmas.gif?v=nostar`,
+      instructionsAnimation: `${basePath}/images/instructions-animation-xmas.gif?v=gifthigh`,
       instructionsTimeBar: `${basePath}/images/instructions-time-bar.png?v=art`,
       instructionsGiftNumSample: `${basePath}/images/instructions-gift-num-sample.png?v=goldgift`,
       
