@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import styles from "./GameEndDialog.module.scss";
 import { formatNumberWithCommas } from "@utils/index";
 import AppImage from "@components/AppImage";
-import { gameConfig } from "@config/gameConfig";
+import { gameConfig, uiFor } from "@config/gameConfig";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 interface GameEndDialogProps {
   open: boolean;
@@ -32,6 +33,8 @@ const GameEndDialog: React.FC<GameEndDialogProps> = ({
   onRestartGame,
   onLeaderboard,
 }) => {
+  const { locale, t } = useLanguage();
+  const ui = uiFor(locale);
   const [persistedState, setPersistedState] = useState<{
     score: number;
     bestScore: number;
@@ -111,7 +114,7 @@ const GameEndDialog: React.FC<GameEndDialogProps> = ({
         />
         <div className={styles.resultContent}>
           <div className={styles.infoTopContainer}>
-            <Typography>You have received</Typography>
+            <Typography>{t("received")}</Typography>
             <div className={styles.giftNumberContainer}>
               <AppImage
                 src={gameConfig.assets.ui.giftBoxIcon}
@@ -124,7 +127,7 @@ const GameEndDialog: React.FC<GameEndDialogProps> = ({
             </div>
           </div>
           <div className={styles.infoBottomContainer}>
-            <Typography>Your Score</Typography>
+            <Typography>{t("yourScore")}</Typography>
             <Typography className={styles.scoreNumText}>
               {formatNumberWithCommas(persistedState.score)}
             </Typography>
@@ -134,7 +137,7 @@ const GameEndDialog: React.FC<GameEndDialogProps> = ({
 
       <button type="button" className={styles.button} onClick={onRestartGame}>
         <AppImage
-          src={gameConfig.assets.ui.restartGameButton}
+          src={ui.tryAgainButton}
           alt="Play again button"
         />
       </button>

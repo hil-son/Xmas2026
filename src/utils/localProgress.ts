@@ -49,6 +49,23 @@ export const isCheckedInToday = (progress: LocalProgress): boolean => {
   return progress.checkInDate === todayStamp();
 };
 
+// A finished 3-day streak pays 30 gift boxes, then the marks clear and day 1 starts again.
+export function nextCheckInCycle(count: number, alreadyToday: boolean): {
+  stored: number;
+  shown: number;
+  bonus: number;
+} {
+  const cycle = ((Number(count) || 0) % 3 + 3) % 3;
+  if (alreadyToday) {
+    return { stored: cycle, shown: cycle, bonus: 0 };
+  }
+  const next = cycle + 1;
+  if (next >= 3) {
+    return { stored: 0, shown: 3, bonus: 30 };
+  }
+  return { stored: next, shown: next, bonus: 0 };
+}
+
 export const hasPlayedBefore = (): boolean => {
   if (typeof window === "undefined") return true;
   if (window.localStorage.getItem(HOW_TO_PLAY_KEY) === "1") return true;

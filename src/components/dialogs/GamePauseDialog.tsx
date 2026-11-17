@@ -2,7 +2,8 @@ import { Dialog } from "@mui/material";
 import AppImage from "@components/AppImage";
 import PopupCloseButton from "./PopupCloseButton";
 import styles from "./GamePauseDialog.module.scss";
-import { gameConfig } from "@config/gameConfig";
+import { gameConfig, uiFor } from "@config/gameConfig";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 interface GamePauseDialogProps {
   open: boolean;
@@ -21,6 +22,8 @@ const GamePauseDialog: React.FC<GamePauseDialogProps> = ({
   onRestartGame,
   onBackToMenu,
 }) => {
+  const { locale } = useLanguage();
+  const ui = uiFor(locale);
   return (
     <Dialog open={open} className={styles.root}>
       <div className={styles.controlsContainer}>
@@ -42,28 +45,28 @@ const GamePauseDialog: React.FC<GamePauseDialogProps> = ({
       </div>
 
       <AppImage
-        src={gameConfig.assets.ui.gamePausedTitle}
+        src={ui.gamePausedTitle}
         className={styles.titleImage}
         alt="Game paused title"
       />
 
       <button type="button" className={styles.button} onClick={onResumeGame}>
         <AppImage
-          src={gameConfig.assets.ui.resumeGameButton}
+          src={ui.resumeGameButton}
           alt="Resume game button"
         />
       </button>
 
       <button type="button" className={styles.button} onClick={onRestartGame}>
         <AppImage
-          src={gameConfig.assets.ui.restartGameButton}
+          src={ui.restartGameButton}
           alt="Restart game button"
         />
       </button>
 
       <button type="button" className={styles.button} onClick={onBackToMenu}>
         <AppImage
-          src={gameConfig.assets.ui.backToMenuButton}
+          src={ui.backToMenuButton}
           alt="Back to menu button"
         />
       </button>

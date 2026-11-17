@@ -60,7 +60,7 @@
 
 .titleImage {
   position: relative;
-  width: clamp(0px, calc(270 / 390 * 100vw), calc(270 / 390 * 600px));
+  width: clamp(0px, calc(270 / 390 * 0.8 * 100vw), calc(270 / 390 * 0.8 * 600px));
   margin-bottom: clamp(calc(-19.5 / 390 * 600px), calc(-19.5 / 390 * 100vw), 0px);
 }
 

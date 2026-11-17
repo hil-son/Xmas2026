@@ -215,7 +215,7 @@
 }
 
 .giftCard {
-  top: 518px;
+  top: calc(518px - var(--lift, 0px));
   left: 0;
   width: 100%;
   height: calc(468 / 832 * 393px);
@@ -259,6 +259,54 @@
 .liveDay1 { left: 44.59%; }
 .liveDay2 { left: 57.09%; }
 .liveDay3 { left: 69.59%; }
+
+.tcPlate {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: #123f35;
+  font-family: var(--font-noto-sans-hk);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tcGiftTitle,
+.tcCheckTitle {
+  top: 13.675%;
+  height: 8.12%;
+  justify-content: flex-start;
+  color: #cba071;
+  font-size: 13px;
+}
+
+.tcGiftTitle {
+  left: 9.135%;
+  width: 27.644%;
+}
+
+.tcCheckTitle {
+  left: 44.231%;
+  width: 29.808%;
+  font-size: 12px;
+}
+
+.tcDay {
+  top: 39.53%;
+  width: 11%;
+  height: 5.77%;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.tcDay1 { left: 43.48%; }
+.tcDay2 { left: 56.04%; }
+.tcDay3 { left: 68.54%; }
 
 .flakeRow {
   position: absolute;
@@ -414,7 +462,7 @@
 }
 
 .playButton {
-  top: 629px;
+  top: calc(629px - var(--lift, 0px));
   left: 28px;
   width: 333px;
   height: auto;
@@ -538,10 +586,42 @@
   cursor: default;
 }
 
+.langSwitch {
+  position: absolute;
+  z-index: 20;
+  top: clamp(0px, calc(24 / 390 * 100vw), calc(24 / 390 * 600px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 2px solid #ffe384;
+  border-radius: 999px;
+  background: #e3b258;
+
+  button {
+    min-width: 36px;
+    height: 28px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #aa4c01;
+    font-weight: 800;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+
+    &[aria-pressed="true"] {
+      background: #fff6df;
+    }
+  }
+}
+
 .howToButton {
   position: absolute;
   top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
-  left: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  left: calc(var(--stage-inset, 0px) + clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px)));
   z-index: 20;
   width: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
   height: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
@@ -699,7 +779,7 @@
 .audioControlButton {
   position: absolute;
   top: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
-  right: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  right: calc(var(--stage-inset, 0px) + clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px)));
   width: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
   height: clamp(50px, calc(50 / 390 * 100vw), calc(50 / 390 * 600px));
   cursor: pointer;
@@ -715,7 +795,7 @@
   position: absolute;
   z-index: 20;
   top: clamp(68px, calc(69 / 390 * 100vw), calc(69 / 390 * 600px));
-  right: clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px));
+  right: calc(var(--stage-inset, 0px) + clamp(0px, calc(17 / 390 * 100vw), calc(17 / 390 * 600px)));
   width: 104px;
   margin: 0;
   color: rgba(255, 248, 236, 0.46);

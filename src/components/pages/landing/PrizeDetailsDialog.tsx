@@ -2,8 +2,9 @@ import { Dialog } from "@mui/material";
 import { Noto_Sans } from "next/font/google";
 import AppImage from "@components/AppImage";
 import PopupCloseButton from "@components/dialogs/PopupCloseButton";
-import { gameConfig } from "@config/gameConfig";
+import { gameConfig, uiFor } from "@config/gameConfig";
 import styles from "./PrizeDetailsDialog.module.scss";
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 interface PrizeDetailsDialogProps {
   open: boolean;
@@ -14,6 +15,7 @@ const detailFont = Noto_Sans({
   weight: ["400", "500", "700", "800"],
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-noto-sans",
 });
 
 const asset = (file: string) => `${gameConfig.basePath}/images/prize-details/${file}`;
@@ -89,20 +91,22 @@ function Deco({
 }
 
 const PrizeDetailsDialog: React.FC<PrizeDetailsDialogProps> = ({ open, onClose }) => {
+  const { locale, t } = useLanguage();
+  const ui = uiFor(locale);
   return (
     <Dialog open={open} onClose={onClose} className={styles.root}>
-      <div className={`${styles.frame} ${detailFont.className}`}>
+      <div className={`${styles.frame} ${detailFont.variable}`}>
         <div className={styles.card}>
           <PopupCloseButton onClick={onClose} className={styles.close} />
           <div className={styles.copy}>
-            <h2 className={styles.title}>Game Details</h2>
+            <h2 className={styles.title}>{t("detailsTitle")}</h2>
             <p className={styles.lead}>
-              Collect the most <strong>Gift Box</strong> to win Park’n Shop Voucher<span className={styles.mark}>*</span>!
+              {t("detailsBefore")}<strong>{t("detailsGift")}</strong>{t("detailsAfter")}<span className={styles.mark}>*</span>!
             </p>
             <p className={styles.period}>
-              Game period:
+              {t("detailsPeriodLabel")}
               <br />
-              23 Nov to 21 Dec 2026
+              {t("detailsPeriod")}
             </p>
           </div>
 
@@ -111,12 +115,12 @@ const PrizeDetailsDialog: React.FC<PrizeDetailsDialogProps> = ({ open, onClose }
           </div>
 
           <button type="button" className={styles.ok} onClick={onClose}>
-            <AppImage src={gameConfig.assets.ui.okButton} alt="OK" />
+            <AppImage src={ui.okButton} alt="OK" />
           </button>
 
           <p className={styles.terms}>
-            <a href="https://web.three.com.hk/tnc/261123/tnc-xmas-crush-en.pdf" target="_blank" rel="noreferrer">
-              Terms and conditions apply.
+            <a href={t("termsUrl")} target="_blank" rel="noreferrer">
+              {t("terms")}
             </a>
           </p>
 

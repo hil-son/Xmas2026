@@ -174,6 +174,7 @@ export const gameConfig = {
       menuButton: `${basePath}/images/menu-button.png`,
       resumeGameButton: `${basePath}/images/resume-game-button.png?v=lights`,
       restartGameButton: `${basePath}/images/restart-game-button.png?v=lights`,
+      tryAgainButton: `${basePath}/images/restart-game-button.png?v=lights`,
       backToMenuButton: `${basePath}/images/back-to-menu-button.png?v=lights`,
       okButton: `${basePath}/images/ok-button.png?v=green`,
 
@@ -209,3 +210,27 @@ export const gameConfig = {
     },
   },
 };
+
+const tcImage = (file: string) => `${basePath}/images/${file}?v=tc`;
+
+export function uiFor(locale: "en" | "zh-Hant") {
+  const ui = gameConfig.assets.ui;
+  if (locale !== "zh-Hant") return ui;
+  return {
+    ...ui,
+    playNowButton: tcImage("startgame-game-button-tc.png"),
+    nextButton: tcImage("next-button-tc.png"),
+    resumeGameButton: tcImage("resume-game-button-tc.png"),
+    restartGameButton: tcImage("restart-game-button-tc.png"),
+    tryAgainButton: tcImage("tryagain-game-button-tc.png"),
+    backToMenuButton: tcImage("back-to-menu-button-tc.png"),
+    okButton: tcImage("ok-game-button-tc.png"),
+    gamePausedTitle: tcImage("game-paused-title-tc.png"),
+    instructionsTitle: tcImage("instructions-title-tc.png"),
+    checkInDialogCheckInTopBanner: {
+      day1: tcImage("check-in-box-day-1-top-banner-tc.png"),
+      day2: tcImage("check-in-box-day-2-top-banner-tc.png"),
+      day3: tcImage("check-in-box-day-3-top-banner-tc.png"),
+    },
+  };
+}

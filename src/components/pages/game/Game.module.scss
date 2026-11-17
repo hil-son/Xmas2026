@@ -42,9 +42,9 @@
     content: "";
     position: absolute;
     z-index: -1;
-    inset: 0 8px;
+    inset: 8px 8px 0;
     background: #123f35;
-    border-radius: 10px 10px 0 0;
+    border-radius: 10px;
   }
 }
 
@@ -71,7 +71,7 @@
 }
 
 .flakeRowTop {
-  top: calc(8 / 136 * 100%);
+  top: calc(8 / 136 * 100% + 8px);
 }
 
 .flakeRowBottom {
@@ -81,7 +81,7 @@
 .scoreGroupBest,
 .scoreGroupCurrent {
   position: absolute;
-  top: calc(37 / 136 * 100%);
+  top: calc(37 / 136 * 100% + 8px);
   width: calc(131 / 372 * 100%);
   display: flex;
   flex-direction: column;
@@ -105,6 +105,11 @@
   text-align: center;
 }
 
+.scoreLabelTc {
+  font-family: var(--font-noto-sans-hk);
+  font-weight: 700;
+}
+
 .scorePill {
   width: 100%;
   box-sizing: border-box;
@@ -124,7 +129,7 @@
 .pauseButton {
   position: absolute;
   left: calc(15 / 372 * 100%);
-  top: calc(41.5 / 136 * 100%);
+  top: calc(41.5 / 136 * 100% + 8px);
   width: calc(50 / 372 * 100%);
   aspect-ratio: 1;
   padding: 0;
@@ -207,13 +212,13 @@
 }
 
 .caneLeft {
-  left: 0;
+  left: 8px;
   width: calc(50 / 372 * 100%);
   height: calc(50 / 136 * 100%);
 }
 
 .caneRight {
-  right: 0;
+  right: 8px;
   width: calc(54 / 372 * 100%);
   height: calc(49 / 136 * 100%);
 }
@@ -225,11 +230,11 @@
 .boardWrapper {
   position: relative;
   z-index: 1;
-  /* The top 40px of gameboard.png is transparent, so tuck it under the header. */
+  /* The top 40px of gameboard.png is transparent. Pull it up, then leave 8px of background under the header. */
   margin-top: clamp(
-    calc(-40 / 848 * 451.33 / 390 * 600px),
-    calc(-40 / 848 * 451.33 / 390 * 100vw),
-    0px
+    calc(-40 / 848 * 451.33 / 390 * 600px + 8px),
+    calc(-40 / 848 * 451.33 / 390 * 100vw + 8px),
+    8px
   );
 }
 
@@ -286,12 +291,14 @@
 
 .timeBarContainer {
   position: relative;
+  align-self: center;
+  // Sit midway between the board frame and the gift bar. The frame ends 32px above the art's bottom.
   margin-top: clamp(
-    calc(-12 / 390 * 600px),
-    calc(-12 / 390 * 100vw),
+    calc((12 / 390 - 451.33 / 390 * 32 / 848) * 600px),
+    calc((12 / 390 - 451.33 / 390 * 32 / 848) * 100vw),
     0px
   );
-  width: clamp(0px, calc(361 / 390 * 100vw), calc(361 / 390 * 600px));
+  width: calc(100% - 16px);
   height: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
@@ -351,8 +358,31 @@
 
 .gameBottomGiftNumBar {
   position: relative;
+  container-type: inline-size;
   margin-top: clamp(0px, calc(12 / 390 * 100vw), calc(12 / 390 * 600px));
-  width: clamp(0px, calc(361 / 390 * 100vw), calc(361 / 390 * 600px));
+  width: calc(100% - 16px);
+
+  .tcGiftTitle {
+    position: absolute;
+    z-index: 1;
+    left: 3.84%;
+    top: 36.76%;
+    width: 31.51%;
+    height: 22.06%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-left: 0.6%;
+    background: #123f35;
+    color: #cba071;
+    font-family: var(--font-noto-sans-hk);
+    font-weight: 700;
+    font-size: 4.2cqi;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+  }
 
   .gameGiftNumberContainer {
     position: absolute;

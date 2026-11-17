@@ -17,6 +17,7 @@ import {
   todayStamp,
   type LocalProgress,
 } from "@utils/localProgress";
+import { LanguageProvider } from "@/i18n/LanguageProvider";
 
 // Configuration - now imported from centralized config
 const { board, time, scoring, combo, assets } = gameConfig;
@@ -401,8 +402,12 @@ export default function Home() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyProgress = (progress: LocalProgress) => {
+    const count = ((Number(progress.continuousCheckinCount) || 0) % 3 + 3) % 3;
+    if (count !== progress.continuousCheckinCount) {
+      saveProgress({ ...progress, continuousCheckinCount: count });
+    }
     setBestScore(progress.bestScore);
-    setContinuousCheckinCount(progress.continuousCheckinCount);
+    setContinuousCheckinCount(count);
     setSpecialItemPoint(progress.specialItemPoint);
     setTempSpecialItemPoint(progress.specialItemPoint);
     setCheckInToday(isCheckedInToday(progress));
@@ -492,6 +497,7 @@ export default function Home() {
   };
 
   return (
+    <LanguageProvider>
     <Box id="root">
       {page === "landing" && (
         <Landing
@@ -543,5 +549,6 @@ export default function Home() {
         onClose={handleCloseInstructions}
       />
     </Box>
+    </LanguageProvider>
   );
 }

@@ -6,6 +6,161 @@ import styles from "./Board.module.scss";
 import Cell from "./Cell";
 import { gameConfig } from "@config/gameConfig";
 
+const WOBBLE_DELAY_MS = 500;
+const VIBRATION_IDLE_MS = 900;
+const wobbleTimers = new Set<number>();
+let pendingVibrationSwaps = 0;
+let vibrationReleaseTimer: number | null = null;
+
+// One buzz for a run of swaps. Each extra swap adds a longer pulse, then it plays once they stop.
+function vibrateAccumulated(count: number) {
+  if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") {
+    return;
+  }
+  const swaps = Math.min(Math.max(count, 1), 8);
+  const pulses = Math.min(swaps + 1, 6);
+  const pattern: number[] = [];
+  for (let i = 0; i < pulses; i++) {
+    if (i > 0) pattern.push(30);
+    pattern.push(70 + i * 22);
+  }
+  navigator.vibrate(pattern);
+}
+
+function queueSwapVibration() {
+  pendingVibrationSwaps += 1;
+  if (vibrationReleaseTimer !== null) {
+    window.clearTimeout(vibrationReleaseTimer);
+    vibrationReleaseTimer = null;
+  }
+}
+
+function armVibrationRelease() {
+  if (pendingVibrationSwaps === 0 || vibrationReleaseTimer !== null) return;
+  vibrationReleaseTimer = window.setTimeout(() => {
+    vibrationReleaseTimer = null;
+    const count = pendingVibrationSwaps;
+    pendingVibrationSwaps = 0;
+    vibrateAccumulated(count);
+  }, VIBRATION_IDLE_MS);
+}
+
+function cancelPendingVibration() {
+  if (vibrationReleaseTimer !== null) {
+    window.clearTimeout(vibrationReleaseTimer);
+    vibrationReleaseTimer = null;
+  }
+  pendingVibrationSwaps = 0;
+  if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+    navigator.vibrate(0);
+  }
+}
+
+function cancelPendingWobbles() {
+  wobbleTimers.forEach((timer) => window.clearTimeout(timer));
+  wobbleTimers.clear();
+  activeWobbleTweens.forEach((timeline) => timeline.kill());
+  activeWobbleTweens.clear();
+  wobblesByElement.forEach((wobbles, element) => {
+    wobbles.clear();
+    if (element.isConnected) renderWobbles(element);
+  });
+  wobblesByElement.clear();
+}
+
+type WobbleOffset = { x: number; y: number; scale: number };
+
+const wobblesByElement = new Map<HTMLElement, Set<WobbleOffset>>();
+const activeWobbleTweens = new Set<gsap.core.Timeline>();
+
+function renderWobbles(element: HTMLElement) {
+  let x = 0;
+  let y = 0;
+  let scale = 1;
+  wobblesByElement.get(element)?.forEach((wobble) => {
+    x += wobble.x;
+    y += wobble.y;
+    scale += wobble.scale - 1;
+  });
+  gsap.set(element, {
+    x,
+    y,
+    rotation: 0,
+    scale,
+    transformOrigin: "50% 50%",
+  });
+}
+
+// Layout position inside the board. Ignores the board wobble so a swap
+// does not leave pieces sitting in the wrong hole.
+function layoutPoint(element: HTMLElement, board: HTMLElement) {
+  let x = 0;
+  let y = 0;
+  let node: HTMLElement | null = element;
+  while (node && node !== board) {
+    x += node.offsetLeft;
+    y += node.offsetTop;
+    const parent = node.offsetParent as HTMLElement | null;
+    if (!parent || parent === node) break;
+    node = parent;
+  }
+  return { x, y };
+}
+
+function clearCellShift(cells: Array<HTMLElement | null | undefined>) {
+  cells.forEach((cell) => {
+    if (!cell || wobblesByElement.has(cell)) return;
+    gsap.killTweensOf(cell);
+    cell.style.transform = "";
+    cell.style.translate = "";
+    cell.style.rotate = "";
+  });
+}
+
+function buzzCells(cells: HTMLElement[], step: number) {
+  const level = Math.min(Math.max(step, 1), 6);
+  const distance = 7 + level * 1.2;
+  const beats = [
+    { x: -1, y: 0, scale: 1.015 },
+    { x: 1, y: 0, scale: 0.988 },
+    { x: 0, y: -0.8, scale: 1.012 },
+    { x: 0, y: 0.65, scale: 0.994 },
+    { x: -0.35, y: 0, scale: 1.006 },
+    { x: 0, y: 0, scale: 1 },
+  ];
+
+  cells.forEach((cell) => {
+    if (!cell.isConnected) return;
+    const wobble: WobbleOffset = { x: 0, y: 0, scale: 1 };
+    const wobbles = wobblesByElement.get(cell) ?? new Set<WobbleOffset>();
+    wobbles.add(wobble);
+    wobblesByElement.set(cell, wobbles);
+
+    const timeline = gsap.timeline({
+      onComplete: () => {
+        activeWobbleTweens.delete(timeline);
+        wobbles.delete(wobble);
+        if (wobbles.size === 0) wobblesByElement.delete(cell);
+        if (cell.isConnected) renderWobbles(cell);
+      },
+    });
+    activeWobbleTweens.add(timeline);
+    beats.forEach((beat, index) => {
+      const settle = index === beats.length - 1;
+      timeline.to(wobble, {
+        x: distance * beat.x,
+        y: distance * beat.y,
+        scale: beat.scale,
+        duration: settle ? 0.16 : 0.08,
+        ease: settle ? "power2.out" : "sine.inOut",
+        onUpdate: () => {
+          if (cell.isConnected) renderWobbles(cell);
+        },
+      });
+    });
+  });
+}
+
 interface BoardProps {
   width: number;
   height: number;
@@ -47,6 +202,14 @@ const Board: React.FC<BoardProps> = ({
     audioOnRef.current = audioOn;
   }, [audioOn]);
 
+  useEffect(
+    () => () => {
+      cancelPendingWobbles();
+      cancelPendingVibration();
+    },
+    []
+  );
+
   // Sound effects
   const matchSound = useSound(gameConfig.sounds.effects.match.path, {
     volume: gameConfig.sounds.effects.match.volume,
@@ -60,6 +223,10 @@ const Board: React.FC<BoardProps> = ({
   // const invalidSound = useSound("/sounds/invalid.mp3", { volume: 0.4 });
 
   const specialItemType = 4; // Gift box, the fourth board item
+  const successfulSwapsRef = useRef(0);
+  const boardElRef = useRef<HTMLDivElement>(null);
+  const chainWobbleRef = useRef(0);
+  const wobbleFromPlayRef = useRef(false);
 
   // Initialize the board with random items
   const initializeBoard = () => {
@@ -180,6 +347,7 @@ const Board: React.FC<BoardProps> = ({
         setDragStart(null);
         // Enable dragging since no initial matches were found
         setIsFreezing(false);
+        armVibrationRelease();
       }
     }, 300);
     return () => clearTimeout(timer);
@@ -289,6 +457,22 @@ const Board: React.FC<BoardProps> = ({
     return uniqueMatches;
   };
 
+  const overlayBoardWobbles = (total: number) => {
+    const boardEl = boardElRef.current;
+    if (!boardEl) return;
+    const target = Math.min(Math.max(total, 1), 8);
+    const active = wobblesByElement.get(boardEl)?.size ?? 0;
+    const missing = target - active;
+    chainWobbleRef.current = target;
+    for (let i = 0; i < missing; i++) {
+      const timer = window.setTimeout(() => {
+        wobbleTimers.delete(timer);
+        if (boardEl.isConnected) buzzCells([boardEl], 1);
+      }, i * 70);
+      wobbleTimers.add(timer);
+    }
+  };
+
   const handleMatches = (
     matches: { row: number; col: number }[],
     sourceBoard: Item[][] = boardRef.current
@@ -319,6 +503,9 @@ const Board: React.FC<BoardProps> = ({
 
     boardRef.current = newBoard;
     setBoard(newBoard);
+    if (wobbleFromPlayRef.current && matches.length > 0) {
+      overlayBoardWobbles(chainWobbleRef.current + 1);
+    }
     onMatch(matches.length);
 
     // Replace matched items after a delay
@@ -339,10 +526,11 @@ const Board: React.FC<BoardProps> = ({
 
   // Distance from one row to the next, including the tile gap on the board art.
   const getRowStride = (col: number, fallbackHeight: number) => {
+    const boardEl = boardElRef.current;
     const first = cellRefs.current[getCellRefKey(0, col)];
     const second = cellRefs.current[getCellRefKey(Math.min(1, height - 1), col)];
-    if (first && second && first !== second) {
-      return second.getBoundingClientRect().top - first.getBoundingClientRect().top;
+    if (boardEl && first && second && first !== second) {
+      return layoutPoint(second, boardEl).y - layoutPoint(first, boardEl).y;
     }
     return fallbackHeight;
   };
@@ -351,6 +539,7 @@ const Board: React.FC<BoardProps> = ({
     matches: { row: number; col: number }[],
     sourceBoard: Item[][] = boardRef.current
   ) => {
+    clearCellShift(Object.values(cellRefs.current));
     const newBoard = sourceBoard.map((row) => row.map((item) => ({ ...item })));
 
     // const dropEase = "bounce.out"; // Original GSAP bounce
@@ -408,13 +597,11 @@ const Board: React.FC<BoardProps> = ({
               placeholder.style.boxShadow = sourceStyles.boxShadow;
 
               // Position at the same spot as the original cell
-              const rect = cellRef.getBoundingClientRect();
-              const boardRect = cellRef
-                .closest(`.${styles.board}`)
-                ?.getBoundingClientRect() || { left: 0, top: 0 };
+              const boardEl = cellRef.closest(`.${styles.board}`) as HTMLElement | null;
+              const origin = boardEl ? layoutPoint(cellRef, boardEl) : { x: 0, y: 0 };
 
-              placeholder.style.left = `${rect.left - boardRect.left}px`;
-              placeholder.style.top = `${rect.top - boardRect.top}px`;
+              placeholder.style.left = `${origin.x}px`;
+              placeholder.style.top = `${origin.y}px`;
 
               // Add image content
               const img = document.createElement("img");
@@ -462,9 +649,9 @@ const Board: React.FC<BoardProps> = ({
         // Get cell dimensions for accurate animation
         const cellRef = cellRefs.current[getCellRefKey(row, col)];
         if (cellRef) {
-          const cellRect = cellRef.getBoundingClientRect();
+          const cellRectHeight = cellRef.offsetHeight;
           const totalFallDistance =
-            emptySpacesBelowCount * getRowStride(col, cellRect.height);
+            emptySpacesBelowCount * getRowStride(col, cellRectHeight);
 
           maxDuration = Math.max(
             maxDuration,
@@ -573,18 +760,13 @@ const Board: React.FC<BoardProps> = ({
             placeholder.style.boxShadow = sourceStyles.boxShadow;
 
             // Position above the board (start from above and fall down)
-            const rect = cellRef.getBoundingClientRect();
-            const boardRect = cellRef
-              .closest(`.${styles.board}`)
-              ?.getBoundingClientRect() || { left: 0, top: 0 };
+            const boardEl = cellRef.closest(`.${styles.board}`) as HTMLElement | null;
+            const origin = boardEl ? layoutPoint(cellRef, boardEl) : { x: 0, y: 0 };
+            const rowStride = getRowStride(col, cellRef.offsetHeight);
 
-            const rowStride = getRowStride(col, rect.height);
-
-            // Get row 0 position as reference
             const row0Ref = cellRefs.current[getCellRefKey(0, col)];
-            const row0Y = row0Ref
-              ? row0Ref.getBoundingClientRect().top - boardRect.top
-              : rect.top - boardRect.top;
+            const row0Y =
+              boardEl && row0Ref ? layoutPoint(row0Ref, boardEl).y : origin.y;
 
             // Stack the new pieces above row 0 by the same stride the tiles use.
             const startY = row0Y + (row - matchedCellsInColumn) * rowStride;
@@ -593,7 +775,7 @@ const Board: React.FC<BoardProps> = ({
             const fallDistance = matchedCellsInColumn * rowStride;
 
             // Start position: stacked above the board
-            placeholder.style.left = `${rect.left - boardRect.left}px`;
+            placeholder.style.left = `${origin.x}px`;
             placeholder.style.top = `${startY}px`;
 
             // Add image content
@@ -651,10 +833,13 @@ const Board: React.FC<BoardProps> = ({
     // Early show combo
     if (findMatches().length === 0) {
       setTimeout(() => {
+        wobbleFromPlayRef.current = false;
+        chainWobbleRef.current = 0;
         onResetCombo();
 
         setTimeout(() => {
           setIsFreezing(false);
+          armVibrationRelease();
         }, 500);
       }, maxNewItemDuration * 1000 * 0.6);
     }
@@ -701,16 +886,34 @@ const Board: React.FC<BoardProps> = ({
     const swapItemDuration = 0.3;
 
     if (isFreezing) return;
+    clearCellShift(Object.values(cellRefs.current));
     setIsFreezing(true);
 
     // Create virtual board to check for matches without updating state
     const virtualBoard = createVirtualBoard(board);
     virtualSwapItems(virtualBoard, row1, col1, row2, col2);
     const potentialMatches = findMatches(virtualBoard);
+    if (potentialMatches.length > 0) {
+      successfulSwapsRef.current += 1;
+      queueSwapVibration();
+      wobbleFromPlayRef.current = true;
+      chainWobbleRef.current = 0;
+    }
 
     // Get references to the cells to animate
     const cell1Ref = cellRefs.current[getCellRefKey(row1, col1)];
     const cell2Ref = cellRefs.current[getCellRefKey(row2, col2)];
+
+    if (potentialMatches.length > 0) {
+      const swappedCells = [cell1Ref, cell2Ref].filter(
+        (cell): cell is HTMLDivElement => Boolean(cell)
+      );
+      const wobbleTimer = window.setTimeout(() => {
+        wobbleTimers.delete(wobbleTimer);
+        buzzCells(swappedCells, chainWobbleRef.current || 1);
+      }, WOBBLE_DELAY_MS);
+      wobbleTimers.add(wobbleTimer);
+    }
 
     if (cell1Ref && cell2Ref) {
       console.log(
@@ -720,11 +923,15 @@ const Board: React.FC<BoardProps> = ({
       );
 
       // Calculate the positions for the animation
-      const cell1Rect = cell1Ref.getBoundingClientRect();
-      const cell2Rect = cell2Ref.getBoundingClientRect();
+      const cell1Point = boardElRef.current
+        ? layoutPoint(cell1Ref, boardElRef.current)
+        : { x: 0, y: 0 };
+      const cell2Point = boardElRef.current
+        ? layoutPoint(cell2Ref, boardElRef.current)
+        : { x: 0, y: 0 };
 
-      const xDistance = cell2Rect.left - cell1Rect.left;
-      const yDistance = cell2Rect.top - cell1Rect.top;
+      const xDistance = cell2Point.x - cell1Point.x;
+      const yDistance = cell2Point.y - cell1Point.y;
 
       // Save the cell colors BEFORE modifying state
       const cell1Type = board[row1][col1].type;
@@ -756,13 +963,11 @@ const Board: React.FC<BoardProps> = ({
         placeholder.style.boxShadow = sourceStyles.boxShadow;
 
         // Position at the same spot as the original cell
-        const rect = sourceCell.getBoundingClientRect();
-        const boardRect = sourceCell
-          .closest(`.${styles.board}`)
-          ?.getBoundingClientRect() || { left: 0, top: 0 };
+        const boardEl = sourceCell.closest(`.${styles.board}`) as HTMLElement | null;
+        const origin = boardEl ? layoutPoint(sourceCell, boardEl) : { x: 0, y: 0 };
 
-        placeholder.style.left = `${rect.left - boardRect.left}px`;
-        placeholder.style.top = `${rect.top - boardRect.top}px`;
+        placeholder.style.left = `${origin.x}px`;
+        placeholder.style.top = `${origin.y}px`;
 
         // Add image content with responsive size
         const img = document.createElement("img");
@@ -861,6 +1066,7 @@ const Board: React.FC<BoardProps> = ({
                   placeholder2.remove();
 
                   setIsFreezing(false);
+                  armVibrationRelease();
                 }, 10);
               },
             });
@@ -938,7 +1144,7 @@ const Board: React.FC<BoardProps> = ({
   // Tile holes measured on gameboard.png (848×920): 8×9 cells, 74px square, pitch 92.
   const cellSize = (74 / 848) * 451.33;
   return (
-    <div className={styles.board}>
+    <div className={styles.board} ref={boardElRef}>
       <img
         className={styles.boardPlate}
         src={gameConfig.assets.ui.gameBoard}

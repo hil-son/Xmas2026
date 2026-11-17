@@ -5,6 +5,7 @@ import { gameConfig } from "@config/gameConfig";
 import { formatNumberWithCommas } from "@utils/index";
 import styles from "./Landing.module.scss";
 import { CoverFx, STAGE_H, STAGE_W, startCoverEffects } from "./coverEffects";
+import { useLanguage } from "@/i18n/LanguageProvider";
 import PrizeDetailsDialog from "./PrizeDetailsDialog";
 
 interface LandingProps {
@@ -21,13 +22,15 @@ interface LandingProps {
 const valueFont = Montserrat_Alternates({ weight: "700", subsets: ["latin"], display: "swap" });
 
 const coverSrc = `${gameConfig.basePath}/images/cover.png`;
+const coverSrcTc = `${gameConfig.basePath}/images/cover-tc.png?v=tc`;
 const genericCoverSrc = `${gameConfig.basePath}/images/cover-generic.png`;
 const pugSrc = `${gameConfig.basePath}/images/pug.png`;
-// Campaign art stays up through 21 Dec 2026. Hong Kong has no daylight saving.
-const CAMPAIGN_COVER_ENDS = Date.parse("2026-12-22T00:00:00+08:00");
+// Campaign art stays up through 20 Dec 2026. Hong Kong has no daylight saving.
+const CAMPAIGN_COVER_ENDS = Date.parse("2026-12-21T00:00:00+08:00");
 // setTimeout delay is a 32-bit signed integer, so anything past ~24.8 days fires immediately.
 const COVER_CHECK_MS = 24 * 60 * 60 * 1000;
-const playSrc = `${gameConfig.basePath}/images/cover-play.png?v=lights`;
+const playSrcEn = `${gameConfig.basePath}/images/cover-play.png?v=lights`;
+const playSrcTc = `${gameConfig.basePath}/images/cover-play-tc.png?v=tc`;
 const cardBase = `${gameConfig.basePath}/images/covercard`;
 const giftCardSrc = `${gameConfig.basePath}/images/cover-gift-card.png?v=closegap`;
 
@@ -113,15 +116,19 @@ const Landing: React.FC<LandingProps> = ({
   onPlay,
   onInstructions,
 }) => {
+  const { locale, setLocale, t } = useLanguage();
   const rootRef = useRef<HTMLDivElement>(null);
   const lightsRef = useRef<HTMLDivElement>(null);
   const snowRef = useRef<HTMLCanvasElement>(null);
   const globeRef = useRef<HTMLCanvasElement>(null);
   const pugRef = useRef<HTMLCanvasElement>(null);
   const [scale, setScale] = useState(1);
+  const [lift, setLift] = useState(0);
+  const [inset, setInset] = useState(0);
+  const [viewH, setViewH] = useState(STAGE_H);
   const [genericCover, setGenericCover] = useState(() => Date.now() >= CAMPAIGN_COVER_ENDS);
   const [prizeOpen, setPrizeOpen] = useState(false);
-  const plateSrc = genericCover ? genericCoverSrc : coverSrc;
+  const plateSrc = genericCover ? genericCoverSrc : locale === "zh-Hant" ? coverSrcTc : coverSrc;
   const playRef = useRef<HTMLButtonElement>(null);
   const fxRef = useRef<CoverFx>({
     snow: true,
@@ -144,8 +151,29 @@ const Landing: React.FC<LandingProps> = ({
 
     const fit = () => {
       const width = parent.clientWidth;
-      if (!width) return;
-      setScale(width / STAGE_W);
+      const height = parent.clientHeight;
+      if (!width || !height) return;
+      // Gift card bottom, in stage pixels. Keep a little air under the Play button.
+      const cardBottom = 518 + (468 / 832) * 393 + 16;
+      // The card can rise this far before it covers the Christmas Crush plaque.
+      const maxLift = 40;
+      const widthScale = width / STAGE_W;
+      const liftForWidth = cardBottom - height / widthScale;
+      let nextScale = widthScale;
+      let nextLift = 0;
+      if (liftForWidth > 0) {
+        if (liftForWidth <= maxLift) {
+          nextLift = liftForWidth;
+        } else {
+          nextLift = maxLift;
+          nextScale = height / (cardBottom - maxLift);
+        }
+      }
+      const nextInset = Math.max(0, (width - STAGE_W * nextScale) / 2);
+      setScale((current) => (Math.abs(current - nextScale) < 0.002 ? current : nextScale));
+      setLift((current) => (Math.abs(current - nextLift) < 0.5 ? current : nextLift));
+      setInset((current) => (Math.abs(current - nextInset) < 0.5 ? current : nextInset));
+      setViewH((current) => (Math.abs(current - height) < 0.5 ? current : height));
     };
 
     fit();
@@ -308,14 +336,20 @@ const Landing: React.FC<LandingProps> = ({
   };
 
   return (
-    <div className={styles.root} ref={rootRef}>
-      <div className={styles.sizer} style={{ height: STAGE_H * scale }}>
+    <div
+      className={styles.root}
+      ref={rootRef}
+      style={{ ["--stage-inset" as string]: `${inset}px` }}
+    >
+      <div className={styles.sizer} style={{ height: Math.min(STAGE_H * scale, viewH) }}>
       <div
         className={styles.stage}
         style={{
           width: STAGE_W,
           height: STAGE_H,
+          left: inset,
           transform: `scale(${scale})`,
+          ["--lift" as string]: `${lift}px`,
         }}
       >
         <div className={styles.scene}>
@@ -350,7 +384,7 @@ const Landing: React.FC<LandingProps> = ({
           <button
             type="button"
             className={glitterOn ? styles.globeHit : `${styles.globeHit} ${styles.globeHitOff}`}
-            aria-label="Swirl the snow globe"
+            aria-label={t("swirl")}
             onPointerDown={stirGlobe}
           />
           {!genericCover && (
@@ -358,7 +392,7 @@ const Landing: React.FC<LandingProps> = ({
               type="button"
               className={styles.prizeCard}
               onClick={() => setPrizeOpen(true)}
-              aria-label="Prize details"
+              aria-label={t("prizeDetails")}
             />
           )}
         </div>
@@ -379,9 +413,18 @@ const Landing: React.FC<LandingProps> = ({
               />
             ) : null
           ))}
+          {locale === "zh-Hant" && (
+            <>
+              <span className={`${styles.tcPlate} ${styles.tcGiftTitle}`}>{t("yourGiftBox")}</span>
+              <span className={`${styles.tcPlate} ${styles.tcCheckTitle}`}>{t("dailyCheckIn")}</span>
+              <span className={`${styles.tcPlate} ${styles.tcDay} ${styles.tcDay1}`}>{t("day1")}</span>
+              <span className={`${styles.tcPlate} ${styles.tcDay} ${styles.tcDay2}`}>{t("day2")}</span>
+              <span className={`${styles.tcPlate} ${styles.tcDay} ${styles.tcDay3}`}>{t("day3")}</span>
+            </>
+          )}
         </div>
-        <button ref={playRef} type="button" className={styles.playButton} onClick={onPlay} aria-label="Play">
-          <img src={playSrc} alt="" />
+        <button ref={playRef} type="button" className={styles.playButton} onClick={onPlay} aria-label={t("play")}>
+          <img src={locale === "zh-Hant" ? playSrcTc : playSrcEn} alt="" />
         </button>
       </div>
       </div>
@@ -414,7 +457,7 @@ const Landing: React.FC<LandingProps> = ({
       <button
         type="button"
         className={styles.howToButton}
-        aria-label="How to play"
+        aria-label={t("howToPlay")}
         onClick={onInstructions}
       >
         ?
@@ -447,15 +490,31 @@ const Landing: React.FC<LandingProps> = ({
           <circle cx="17" cy="16" r="2" fill="#2f9bff" />
         </svg>
       </button>
+      <div className={styles.langSwitch} role="group" aria-label={t("language")}>
+        <button
+          type="button"
+          aria-pressed={locale === "en"}
+          onClick={() => setLocale("en")}
+        >
+          EN
+        </button>
+        <button
+          type="button"
+          aria-pressed={locale === "zh-Hant"}
+          onClick={() => setLocale("zh-Hant")}
+        >
+          繁
+        </button>
+      </div>
       <button
         type="button"
         className={styles.audioControlButton}
         onClick={() => setAudioOn(!audioOn)}
       >
         {audioOn ? (
-          <AppImage src={gameConfig.assets.ui.audioOnButton} alt="Audio on" />
+          <AppImage src={gameConfig.assets.ui.audioOnButton} alt={t("audioOn")} />
         ) : (
-          <AppImage src={gameConfig.assets.ui.audioOffButton} alt="Audio off" />
+          <AppImage src={gameConfig.assets.ui.audioOffButton} alt={t("audioOff")} />
         )}
       </button>
       <p className={styles.musicCredit}>

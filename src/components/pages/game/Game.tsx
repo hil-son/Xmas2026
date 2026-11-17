@@ -12,8 +12,9 @@ import AppImage from "@components/AppImage";
 import { gameConfig } from "@config/gameConfig";
 import { GameState } from "@/types/game";
 import { useRouter } from "next/navigation";
-import { saveProgress, todayStamp } from "@utils/localProgress";
+import { nextCheckInCycle, saveProgress, todayStamp } from "@utils/localProgress";
 import { startGameSnow } from "./gameSnow";
+import { useLanguage } from "@/i18n/LanguageProvider";
 import { Abhaya_Libre, Montserrat_Alternates } from "next/font/google";
 
 const scoreLabelFont = Abhaya_Libre({
@@ -105,6 +106,7 @@ const Game: React.FC<GameProps> = ({
   setCheckInToday,
   setTempSpecialItemPoint,
 }) => {
+  const { locale, t } = useLanguage();
   const lastResumeTimeRef = useRef<number>(Date.now());
   const accumulatedTimeRef = useRef<number>(0);
   const bonusTimeRef = useRef<number>(0); // Track accumulated bonus time
@@ -125,6 +127,7 @@ const Game: React.FC<GameProps> = ({
   const [openPauseDialog, setOpenPauseDialog] = useState(false);
   const [openEndDialog, setOpenEndDialog] = useState(false);
   const [openCheckInEndDialog, setOpenCheckInEndDialog] = useState(false);
+  const [checkInDialogDay, setCheckInDialogDay] = useState(1);
 
   const audioOnRef = useRef(audioOn);
   const gameOverHandledRef = useRef(false);
@@ -248,25 +251,23 @@ const Game: React.FC<GameProps> = ({
     if (!gameState.isGameOver || gameOverHandledRef.current) return;
     gameOverHandledRef.current = true;
 
-    // Day-3 check-in pays 30 extra ingots. Apply it here so the reward
-    // still shows when the campaign API is unreachable.
-    const dayThreeBonus = !checkInToday && continuousCheckinCount >= 2 ? 30 : 0;
-    const ingotsEarned = gameState.specialItemMatchNum + dayThreeBonus;
+    // Day 3 of a streak pays 30 gift boxes, then the streak returns to day 1.
+    const checkIn = nextCheckInCycle(continuousCheckinCount, checkInToday);
+    const ingotsEarned = gameState.specialItemMatchNum + checkIn.bonus;
     const nextSpecialItemPoint = specialItemPoint + ingotsEarned;
-    const nextCheckins = checkInToday
-      ? continuousCheckinCount
-      : continuousCheckinCount + 1;
 
     setSpecialItemPoint(nextSpecialItemPoint);
-    if (dayThreeBonus > 0) {
+    setTempSpecialItemPoint?.(nextSpecialItemPoint);
+    shownGiftRef.current = nextSpecialItemPoint;
+    if (checkIn.bonus > 0) {
       setGameState((prev: GameState) => ({
         ...prev,
-        specialItemMatchNum: prev.specialItemMatchNum + dayThreeBonus,
+        specialItemMatchNum: prev.specialItemMatchNum + checkIn.bonus,
       }));
     }
     saveProgress({
       bestScore: Math.max(bestScore, gameState.score),
-      continuousCheckinCount: nextCheckins,
+      continuousCheckinCount: checkIn.stored,
       specialItemPoint: nextSpecialItemPoint,
       checkInDate: todayStamp(),
     });
@@ -276,7 +277,8 @@ const Game: React.FC<GameProps> = ({
     if (checkInToday) {
       setOpenEndDialog(true);
     } else {
-      setContinuousCheckinCount?.(nextCheckins);
+      setContinuousCheckinCount?.(checkIn.stored);
+      setCheckInDialogDay(checkIn.shown);
       setCheckInToday?.(true);
       dailyCheckIn();
       setOpenCheckInEndDialog(true);
@@ -555,7 +557,7 @@ const Game: React.FC<GameProps> = ({
             type="button"
             className={styles.pauseButton}
             onClick={togglePause}
-            aria-label="Pause"
+            aria-label={t("pause")}
           >
             <span className={styles.pauseBase}><img src={`${gameConfig.basePath}/images/topbar/pause-base.svg`} alt="" /></span>
             <span className={styles.pauseInner}><img src={`${gameConfig.basePath}/images/topbar/pause-inner.svg`} alt="" /></span>
@@ -567,14 +569,14 @@ const Game: React.FC<GameProps> = ({
           </button>
 
           <div className={styles.scoreGroupBest}>
-            <span className={`${styles.scoreLabel} ${scoreLabelFont.className}`}>BEST</span>
+            <span className={locale === "en" ? `${styles.scoreLabel} ${scoreLabelFont.className}` : `${styles.scoreLabel} ${styles.scoreLabelTc}`}>{t("best")}</span>
             <span className={`${styles.scorePill} ${scoreValueFont.className}`}>
               {formatNumberWithCommas(bestScore)}
             </span>
           </div>
 
           <div className={styles.scoreGroupCurrent}>
-            <span className={`${styles.scoreLabel} ${scoreLabelFont.className}`}>SCORE</span>
+            <span className={locale === "en" ? `${styles.scoreLabel} ${scoreLabelFont.className}` : `${styles.scoreLabel} ${styles.scoreLabelTc}`}>{t("score")}</span>
             <span className={`${styles.scorePill} ${scoreValueFont.className}`}>
               {formatNumberWithCommas(gameState.score)}
             </span>
@@ -621,7 +623,7 @@ const Game: React.FC<GameProps> = ({
           >
             {gameState.isPaused && (
               <Typography variant="h4" className={styles.pausedText}>
-                PAUSED
+                {t("paused")}
               </Typography>
             )}
             <Board
@@ -715,8 +717,11 @@ const Game: React.FC<GameProps> = ({
           <AppImage
             src={gameConfig.assets.ui.gameBottomGiftNumBar}
             className={styles.gameBottomGiftNumBarImage}
-            alt="Your Gift Box"
+            alt={t("yourGiftBox")}
           />
+          {locale === "zh-Hant" && (
+            <span className={styles.tcGiftTitle}>{t("yourGiftBox")}</span>
+          )}
 
           <div className={styles.gameGiftNumberContainer}>
             <Typography
@@ -739,7 +744,7 @@ const Game: React.FC<GameProps> = ({
 
       <GameCheckInEndDialog
         open={openCheckInEndDialog}
-        continuousCheckinCount={continuousCheckinCount}
+        continuousCheckinCount={checkInDialogDay}
         onNextEndDialog={onNextEndDialog}
       />
 

@@ -16,7 +16,7 @@ declare module "@mui/material/styles" {
 
 const theme = createTheme({
   typography: {
-    fontFamily: 'var(--font-nunito), "Noto Sans TC", sans-serif',
+    fontFamily: "var(--font-nunito), var(--font-noto-sans-hk)",
   },
 });
 

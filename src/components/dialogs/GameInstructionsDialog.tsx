@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from "@mui/material";
 import AppImage from "@components/AppImage";
 import PopupCloseButton from "./PopupCloseButton";
 import styles from "./GameInstructionsDialog.module.scss";
-import { gameConfig } from "@config/gameConfig";
+import { gameConfig, uiFor } from "@config/gameConfig";
 import Typography from "@mui/material/Typography";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from "swiper";
@@ -12,6 +12,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 
 import { Pagination } from 'swiper/modules';
+import { useLanguage } from "@/i18n/LanguageProvider";
 
 const STEP_COUNT = 3;
 
@@ -26,6 +27,8 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
   onPlay,
   onClose,
 }) => {
+  const { locale, t } = useLanguage();
+  const ui = uiFor(locale);
   const swiperRef = useRef<SwiperType | null>(null);
   const [step, setStep] = useState(0);
   const [seen, setSeen] = useState<boolean[]>(() => Array(STEP_COUNT).fill(false).map((_, index) => index === 0));
@@ -87,7 +90,7 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
         >
           <SwiperSlide data-hash="slide1">
             <AppImage
-              src={gameConfig.assets.ui.instructionsTitle}
+              src={ui.instructionsTitle}
               className={styles.titleImage}
               alt="Instructions title"
             />
@@ -101,7 +104,7 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               </div>
 
               <Typography align="center" className={styles.titleText}>
-                Xmas Special
+                {t("xmasSpecial")}
               </Typography>
 
               <AppImage
@@ -111,14 +114,14 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               />
 
               <Typography align="center" className={styles.contentText}>
-                Special Xmas Gift boxes will appear randomly. Grab the most Gift boxes will win exclusive rewards!
+                {t("xmasSpecialBody")}
               </Typography>
             </div>
           </SwiperSlide>
 
           <SwiperSlide data-hash="slide2">
             <AppImage
-              src={gameConfig.assets.ui.instructionsTitle}
+              src={ui.instructionsTitle}
               className={styles.titleImage}
               alt="Instructions title"
             />
@@ -132,19 +135,19 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               </div>
 
               <Typography align="center" className={styles.titleText}>
-                Daily Check-in Bonus
+                {t("checkInTitle")}
               </Typography>
 
               <Typography align="center" className={styles.contentText}>
-                Check in for 3 consecutive days to receive 
-                <span className={styles.brownText}> 30 extra Gift boxes.</span>
+                {t("checkInBodyBefore")}
+                <span className={styles.brownText}>{t("checkInBodyEm")}</span>
               </Typography>
             </div>
           </SwiperSlide>
 
           <SwiperSlide data-hash="slide3">
             <AppImage
-              src={gameConfig.assets.ui.instructionsTitle}
+              src={ui.instructionsTitle}
               className={styles.titleImage}
               alt="Instructions title"
             />
@@ -158,11 +161,11 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               </div>
 
               <Typography align="center" className={styles.titleText}>
-                Game Rules
+                {t("rulesTitle")}
               </Typography>
 
               <Typography align="center" className={styles.contentText}>
-                Match 3 or more of the same item to eliminate them and earn points!
+                {t("rulesMatch")}
               </Typography>
 
               <div className={styles.animationContainer}>
@@ -173,7 +176,7 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
               </div>
 
               <Typography align="center" className={styles.contentText}>
-                Match items to restore the timer below. When time runs out, the game is over.
+                {t("rulesTime")}
               </Typography>
             </div>
           </SwiperSlide>
@@ -184,14 +187,14 @@ const GameInstructionsDialog: React.FC<GameInstructionsDialogProps> = ({
         {showPlay ? (
           <button type="button" className={styles.playNowButton} onClick={onPlay}>
             <AppImage
-              src={gameConfig.assets.ui.playNowButton}
+              src={ui.playNowButton}
               alt="Play now button"
             />
           </button>
         ) : (
           <button type="button" className={styles.nextButton} onClick={onNext}>
             <AppImage
-              src={gameConfig.assets.ui.nextButton}
+              src={ui.nextButton}
               alt="Next"
             />
           </button>

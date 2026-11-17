@@ -5,8 +5,15 @@
       backdrop-filter: blur(16px);
     }
 
+    .MuiPaper-root,
+    .MuiDialogContent-root {
+      overflow: visible;
+    }
+
     .MuiPaper-root {
       margin: 0;
+      width: min(100%, 600px);
+      max-width: min(100vw, 600px);
       background-color: transparent;
       border-radius: 0;
       box-shadow: none;
@@ -23,24 +30,40 @@
 
 .sheet {
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  :global(.instructionSwiper) {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  :global(.instructionSwiper .swiper-slide) {
+    min-width: 0;
+    box-sizing: border-box;
+  }
 }
 
 .sheet > .close {
-  top: 13px;
+  top: -22px;
   right: auto;
-  left: calc((100% - (105% * 0.75)) / 2);
+  left: calc((100% - (105% * 0.75 * 0.8)) / 2);
   transform: none;
 }
 
 .titleImage {
   position: relative;
   display: block;
-  width: calc(105% * 0.75);
+  width: calc(105% * 0.75 * 0.8);
   margin-left: auto;
   margin-right: auto;
 }
 
 .contentContainer {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   margin-top: clamp(calc(-22.5 / 390 * 600px), calc(-22.5 / 390 * 100vw), 0px);
   padding: clamp(0px, calc(45 / 390 * 100vw), calc(45 / 390 * 600px))
     clamp(0px, calc(25 / 390 * 100vw), calc(25 / 390 * 600px))
@@ -54,8 +77,12 @@
 }
 
 .animationContainer {
+  width: 100%;
+  max-width: 100%;
+
   img {
     width: 100%;
+    max-width: 100%;
     height: auto;
     margin-bottom: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
     margin-top: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
@@ -63,6 +90,10 @@
 }
 
 .contentText {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
   font-size: clamp(
     0px,
     calc(16 / 390 * 100vw),

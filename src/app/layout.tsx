@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={nunito.variable}>
-      <body className={nunito.className}>
+      <body>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <ClientModalProvider>{children}</ClientModalProvider>

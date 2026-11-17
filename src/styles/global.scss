@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@300;400;500;600;700&display=swap");
 
 * {
   outline: none;
@@ -7,7 +7,7 @@
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
   user-select: none;
-  --font-noto-sans-tc: 'Noto Sans TC', sans-serif;
+  --font-noto-sans-hk: "Noto Sans HK", sans-serif;
 }
 
 :root {
@@ -22,10 +22,11 @@ html body {
   width: 100vw;
   height: var(--app-height);
   overscroll-behavior-y: none;
+  background: #140c0a;
 }
 
-body {
-  font-family: var(--font-nunito), "Noto Sans TC", sans-serif;
+html body {
+  font-family: var(--font-nunito), var(--font-noto-sans-hk);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -40,6 +41,12 @@ div#root {
   margin: 0 auto;
   width: 100%;
   height: 100%;
+  background: #140c0a;
+
+  // Folded-open screens are wider than the phone column. Fill them instead of leaving white gutters.
+  @media (max-width: 1100px) {
+    max-width: none;
+  }
 
   & > * {
     width: 100%;
