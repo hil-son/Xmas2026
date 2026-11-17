@@ -2,7 +2,7 @@ import GameEndDialog from "@components/dialogs/GameEndDialog";
 import GamePauseDialog from "@components/dialogs/GamePauseDialog";
 import GameCheckInEndDialog from "@/components/dialogs/GameCheckInEndDialog";
 import { Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import axios from "axios";
 import { formatNumberWithCommas } from "@utils/index";
 import useSound from "@hooks/useSound";
@@ -536,6 +536,29 @@ const Game: React.FC<GameProps> = ({
     setOpenEndDialog(true);
   };
 
+  const gameColumnRef = useRef<HTMLDivElement>(null);
+  const [columnScale, setColumnScale] = useState(1);
+
+  useLayoutEffect(() => {
+    const column = gameColumnRef.current;
+    const parent = column?.parentElement;
+    if (!column || !parent) return;
+
+    const fit = () => {
+      const available = parent.clientHeight;
+      const natural = column.offsetHeight;
+      if (!available || !natural) return;
+      const next = natural > available + 1 ? available / natural : 1;
+      setColumnScale((current) => (Math.abs(current - next) < 0.002 ? current : next));
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(column);
+    observer.observe(parent);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className={styles.root}>
       <AppImage
@@ -545,7 +568,11 @@ const Game: React.FC<GameProps> = ({
       />
       <canvas className={styles.snow} ref={snowRef} aria-hidden="true" />
 
-      <div className={styles.gameContainer}>
+      <div
+        className={styles.gameContainer}
+        ref={gameColumnRef}
+        style={{ transform: columnScale < 1 ? `scale(${columnScale})` : undefined }}
+      >
         <div className={styles.topBar}>
           <div className={styles.flakeRowTop}>
             {[...topFlakes].map((key, index) => (
@@ -714,21 +741,26 @@ const Game: React.FC<GameProps> = ({
         </div>
 
         <div className={styles.gameBottomGiftNumBar}>
-          <AppImage
-            src={gameConfig.assets.ui.gameBottomGiftNumBar}
-            className={styles.gameBottomGiftNumBarImage}
-            alt={t("yourGiftBox")}
-          />
-          {locale === "zh-Hant" && (
-            <span className={styles.tcGiftTitle}>{t("yourGiftBox")}</span>
-          )}
-
-          <div className={styles.gameGiftNumberContainer}>
-            <Typography
-              className={`${styles.giftNumText} ${scoreValueFont.className} ${scoreValueFont.variable}`}
+          <div className={styles.giftBar}>
+            <span
+              className={
+                locale === "en"
+                  ? `${styles.giftBarLabel} ${scoreLabelFont.className}`
+                  : `${styles.giftBarLabel} ${styles.scoreLabelTc}`
+              }
             >
-              {formatNumberWithCommas(tempSpecialItemPoint)}
-            </Typography>
+              {t("yourGiftBox")}
+            </span>
+            <div className={styles.giftBarPill}>
+              <AppImage
+                src={gameConfig.assets.ui.giftBoxIcon}
+                className={styles.giftBarIcon}
+                alt=""
+              />
+              <span className={`${styles.giftBarCount} ${scoreValueFont.className}`}>
+                {formatNumberWithCommas(tempSpecialItemPoint)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

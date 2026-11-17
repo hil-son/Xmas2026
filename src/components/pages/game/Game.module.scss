@@ -17,6 +17,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  transform-origin: top center;
+  // Solid frame of gameboard.png is x 50–797 of 848. The faint fringe outside that is not part of the board.
+  --board-frame: clamp(
+    0px,
+    calc(451.33 / 390 * 0.9 * 748 / 848 * 100vw),
+    calc(451.33 / 390 * 0.9 * 748 / 848 * 600px)
+  );
 }
 
 .snow {
@@ -30,8 +38,8 @@
 
 .topBar {
   position: relative;
-  width: 100%;
-  aspect-ratio: 372 / 136;
+  width: var(--board-frame);
+  aspect-ratio: 372 / 108.8;
   flex-shrink: 0;
   background: transparent;
   overflow: hidden;
@@ -42,7 +50,7 @@
     content: "";
     position: absolute;
     z-index: -1;
-    inset: 8px 8px 0;
+    inset: 0;
     background: #123f35;
     border-radius: 10px;
   }
@@ -71,7 +79,7 @@
 }
 
 .flakeRowTop {
-  top: calc(8 / 136 * 100% + 8px);
+  top: calc(8 / 136 * 100%);
 }
 
 .flakeRowBottom {
@@ -81,12 +89,12 @@
 .scoreGroupBest,
 .scoreGroupCurrent {
   position: absolute;
-  top: calc(37 / 136 * 100% + 8px);
+  top: calc(37 / 136 * 100% - 8px);
   width: calc(131 / 372 * 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(5 / 372 * 100cqw);
+  gap: 3px;
 }
 
 .scoreGroupBest {
@@ -99,8 +107,8 @@
 
 .scoreLabel {
   color: #cea272;
-  font-size: calc(24 / 372 * 100cqw);
-  line-height: calc(20 / 372 * 100cqw);
+  font-size: calc(24 / 372 * 0.8 * 100cqw);
+  line-height: 1;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
   text-align: center;
 }
@@ -116,21 +124,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: calc(7 / 372 * 100cqw) 0;
+  padding: calc(7 / 372 * 0.8 * 100cqw) 0;
   border-radius: 100px;
   border: 1px solid #c6a15a;
   background: linear-gradient(180deg, #143528 0%, #071910 100%);
   color: #fff;
-  font-size: calc(20 / 372 * 100cqw);
-  line-height: calc(20 / 372 * 100cqw);
+  font-size: calc(20 / 372 * 0.8 * 100cqw);
+  line-height: 1;
   text-align: center;
 }
 
 .pauseButton {
   position: absolute;
   left: calc(15 / 372 * 100%);
-  top: calc(41.5 / 136 * 100% + 8px);
-  width: calc(50 / 372 * 100%);
+  top: calc(41.5 / 136 * 100%);
+  width: calc(50 / 372 * 0.8 * 100%);
   aspect-ratio: 1;
   padding: 0;
   border: 0;
@@ -200,27 +208,42 @@
 .caneRight {
   position: absolute;
   bottom: 0;
-  z-index: 2;
+  // Above the board and the snowflake row; still under the pause button.
+  z-index: 3;
   pointer-events: none;
+  // Clear height under the pause control, in bar-width units.
+  // Pause top is 41.5/136 of the bar; the control is 40/372 of the bar wide and square.
+  // Bar height is 108.8/372 of its width.
+  --cane-clear: calc((108.8 - 108.8 * 41.5 / 136 - 40) / 372 * 100cqw - 3px);
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
   }
 }
 
 .caneLeft {
-  left: 8px;
-  width: calc(50 / 372 * 100%);
-  height: calc(50 / 136 * 100%);
+  left: 0;
+  // Opaque art sits at the bottom-left of deco-left.png (80×79 inside 106×106).
+  width: calc(var(--cane-clear) * 80 / 79);
+  height: var(--cane-clear);
+
+  img {
+    object-view-box: inset(calc(27 / 106 * 100%) calc(26 / 106 * 100%) 0 0);
+  }
 }
 
 .caneRight {
-  right: 8px;
-  width: calc(54 / 372 * 100%);
-  height: calc(49 / 136 * 100%);
+  right: 0;
+  // Opaque art sits at the bottom-right of deco-right.png (77×77 inside 114×104).
+  width: calc(var(--cane-clear) * 77 / 79);
+  height: calc(var(--cane-clear) * 77 / 79);
+
+  img {
+    object-view-box: inset(calc(27 / 104 * 100%) 0 0 calc(37 / 114 * 100%));
+  }
 }
 
 .pauseButton {
@@ -230,11 +253,11 @@
 .boardWrapper {
   position: relative;
   z-index: 1;
-  /* The top 40px of gameboard.png is transparent. Pull it up, then leave 8px of background under the header. */
+  /* The top 40px of gameboard.png is transparent. Pull it up under the header. */
   margin-top: clamp(
-    calc(-40 / 848 * 451.33 / 390 * 600px + 8px),
-    calc(-40 / 848 * 451.33 / 390 * 100vw + 8px),
-    8px
+    calc(-40 / 848 * 451.33 / 390 * 0.9 * 600px),
+    calc(-40 / 848 * 451.33 / 390 * 0.9 * 100vw),
+    0px
   );
 }
 
@@ -294,11 +317,12 @@
   align-self: center;
   // Sit midway between the board frame and the gift bar. The frame ends 32px above the art's bottom.
   margin-top: clamp(
-    calc((12 / 390 - 451.33 / 390 * 32 / 848) * 600px),
-    calc((12 / 390 - 451.33 / 390 * 32 / 848) * 100vw),
+    calc((0 - 451.33 / 390 * 0.9 * 32 / 848) * 600px),
+    calc((0 - 451.33 / 390 * 0.9 * 32 / 848) * 100vw),
     0px
   );
-  width: calc(100% - 16px);
+  margin-bottom: 2px;
+  width: var(--board-frame);
   height: clamp(0px, calc(10 / 390 * 100vw), calc(10 / 390 * 600px));
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
@@ -357,59 +381,62 @@
 }
 
 .gameBottomGiftNumBar {
-  position: relative;
   container-type: inline-size;
-  margin-top: clamp(0px, calc(12 / 390 * 100vw), calc(12 / 390 * 600px));
-  width: calc(100% - 16px);
-
-  .tcGiftTitle {
-    position: absolute;
-    z-index: 1;
-    left: 3.84%;
-    top: 36.76%;
-    width: 31.51%;
-    height: 22.06%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    box-sizing: border-box;
-    padding-left: 0.6%;
-    background: #123f35;
-    color: #cba071;
-    font-family: var(--font-noto-sans-hk);
-    font-weight: 700;
-    font-size: 4.2cqi;
-    line-height: 1;
-    white-space: nowrap;
-    pointer-events: none;
-  }
-
-  .gameGiftNumberContainer {
-    position: absolute;
-    top: 50%;
-    left: calc(81.92% + clamp(0px, calc(8 / 390 * 100vw), calc(8 / 390 * 600px)));
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-
-    .giftNumText {
-      font-family: var(--font-montserrat-alternates), sans-serif !important;
-      font-weight: 700 !important;
-      font-synthesis: none;
-      font-size: clamp(
-        0px,
-        calc(16 / 390 * 100vw),
-        calc(16 / 390 * 600px)
-      ) !important;
-      color: #fff !important;
-      line-height: 1;
-    }
-  }
+  margin-top: 0;
+  width: var(--board-frame);
 }
 
-.gameBottomGiftNumBarImage {
+.giftBar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
+  height: calc(68 / 365 * 100cqi);
+  padding: calc(10 / 365 * 100cqi) calc(12 / 365 * 100cqi);
+  border: calc(3 / 365 * 100cqi) solid #0c5e4a;
+  border-radius: calc(10 / 365 * 100cqi);
+  background: #123f35;
+}
+
+.giftBarLabel {
+  color: #cea272;
+  font-size: calc(20 / 365 * 100cqi);
+  line-height: 1;
+  text-shadow: 0 calc(1 / 365 * 100cqi) 0 rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.giftBarPill {
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10 / 365 * 100cqi);
+  width: calc(110 / 365 * 100cqi);
+  height: calc(42 / 365 * 100cqi);
+  border: calc(1 / 365 * 100cqi) solid transparent;
+  border-radius: 100px;
+  background: linear-gradient(180deg, rgba(4, 29, 11, 0.5) 0%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+.giftBarIcon {
+  display: block;
+  width: calc(25 / 365 * 100cqi);
+  height: calc(26 / 365 * 100cqi);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.giftBarCount {
+  color: #fff;
+  font-family: var(--font-montserrat-alternates), sans-serif;
+  font-weight: 700;
+  font-synthesis: none;
+  font-size: calc(20 / 365 * 100cqi);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 

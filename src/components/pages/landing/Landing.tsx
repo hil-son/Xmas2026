@@ -123,7 +123,8 @@ const Landing: React.FC<LandingProps> = ({
   const globeRef = useRef<HTMLCanvasElement>(null);
   const pugRef = useRef<HTMLCanvasElement>(null);
   const [scale, setScale] = useState(1);
-  const [lift, setLift] = useState(0);
+  const [shift, setShift] = useState(0);
+  const [globeDrop, setGlobeDrop] = useState(0);
   const [inset, setInset] = useState(0);
   const [viewH, setViewH] = useState(STAGE_H);
   const [genericCover, setGenericCover] = useState(() => Date.now() >= CAMPAIGN_COVER_ENDS);
@@ -155,24 +156,19 @@ const Landing: React.FC<LandingProps> = ({
       if (!width || !height) return;
       // Gift card bottom, in stage pixels. Keep a little air under the Play button.
       const cardBottom = 518 + (468 / 832) * 393 + 16;
-      // The card can rise this far before it covers the Christmas Crush plaque.
-      const maxLift = 40;
-      const widthScale = width / STAGE_W;
-      const liftForWidth = cardBottom - height / widthScale;
-      let nextScale = widthScale;
-      let nextLift = 0;
-      if (liftForWidth > 0) {
-        if (liftForWidth <= maxLift) {
-          nextLift = liftForWidth;
-        } else {
-          nextLift = maxLift;
-          nextScale = height / (cardBottom - maxLift);
-        }
-      }
-      const nextInset = Math.max(0, (width - STAGE_W * nextScale) / 2);
+      // Always fill the width. On a short screen, slide the stage up so the card
+      // stays at the bottom and the top of the globe is what gets cropped.
+      const nextScale = width / STAGE_W;
+      const nextShift = Math.max(0, cardBottom - height / nextScale);
+      // Scene starts 56px above the stage, and the glass circle starts 112px into the scene.
+      // On a Duo-like screen, drop the art until that circle clears the top.
+      const globeTop = -56 + 112;
+      const duo = nextShift > 0 && height / width < 1.7;
+      const nextDrop = duo ? Math.max(0, nextShift - globeTop + 16 / nextScale) : 0;
       setScale((current) => (Math.abs(current - nextScale) < 0.002 ? current : nextScale));
-      setLift((current) => (Math.abs(current - nextLift) < 0.5 ? current : nextLift));
-      setInset((current) => (Math.abs(current - nextInset) < 0.5 ? current : nextInset));
+      setShift((current) => (Math.abs(current - nextShift) < 0.5 ? current : nextShift));
+      setGlobeDrop((current) => (Math.abs(current - nextDrop) < 0.5 ? current : nextDrop));
+      setInset((current) => (current === 0 ? current : 0));
       setViewH((current) => (Math.abs(current - height) < 0.5 ? current : height));
     };
 
@@ -347,12 +343,11 @@ const Landing: React.FC<LandingProps> = ({
         style={{
           width: STAGE_W,
           height: STAGE_H,
-          left: inset,
-          transform: `scale(${scale})`,
-          ["--lift" as string]: `${lift}px`,
+          left: 0,
+          transform: `scale(${scale}) translateY(${-shift}px)`,
         }}
       >
-        <div className={styles.scene}>
+        <div className={styles.scene} style={{ transform: globeDrop ? `translateY(${globeDrop}px)` : undefined }}>
           <img className={styles.plate} src={plateSrc} alt="" />
           <div className={styles.lights} ref={lightsRef} />
           <canvas className={styles.pugLive} ref={pugRef} />
@@ -396,8 +391,19 @@ const Landing: React.FC<LandingProps> = ({
             />
           )}
         </div>
-        <img className={styles.plateExtend} src={plateSrc} alt="" />
-        <canvas className={styles.snow} ref={snowRef} width={STAGE_W} height={STAGE_H} />
+        <img
+          className={styles.plateExtend}
+          src={plateSrc}
+          alt=""
+          style={{ transform: `translateY(${globeDrop}px) scaleY(-1)` }}
+        />
+        <canvas
+          className={styles.snow}
+          ref={snowRef}
+          width={STAGE_W}
+          height={STAGE_H}
+          style={{ transform: globeDrop ? `translateY(${globeDrop}px)` : undefined }}
+        />
         <div className={styles.giftCard}>
           <img className={styles.giftCardArt} src={giftCardSrc} alt="" />
           <span className={`${styles.liveCount} ${valueFont.className}`}>

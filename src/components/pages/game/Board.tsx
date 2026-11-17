@@ -1137,7 +1137,7 @@ const Board: React.FC<BoardProps> = ({
                 onDragEnter={handleDragEnter}
                 onDragEnd={handleDragEnd}
                 items={items}
-                cellSize={`clamp(0px, calc(${cellSize} / 390 * 100vw), calc(${cellSize} / 390 * 600px))`}
+                cellSize={`clamp(0px, calc(${cellSize} / 390 * 0.9 * 100vw), calc(${cellSize} / 390 * 0.9 * 600px))`}
               />
             ))}
           </div>
