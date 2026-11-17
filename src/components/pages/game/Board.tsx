@@ -7,50 +7,18 @@ import Cell from "./Cell";
 import { gameConfig } from "@config/gameConfig";
 
 const WOBBLE_DELAY_MS = 500;
-const VIBRATION_IDLE_MS = 900;
 const wobbleTimers = new Set<number>();
-let pendingVibrationSwaps = 0;
-let vibrationReleaseTimer: number | null = null;
 
-// One buzz for a run of swaps. Each extra swap adds a longer pulse, then it plays once they stop.
-function vibrateAccumulated(count: number) {
+// One pulse per on-screen wobble. Short enough that combo layers 70ms apart each get their own buzz.
+function vibrateForWobble(step: number) {
   if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") {
     return;
   }
-  const swaps = Math.min(Math.max(count, 1), 8);
-  const pulses = Math.min(swaps + 1, 6);
-  const pattern: number[] = [];
-  for (let i = 0; i < pulses; i++) {
-    if (i > 0) pattern.push(30);
-    pattern.push(70 + i * 22);
-  }
-  navigator.vibrate(pattern);
-}
-
-function queueSwapVibration() {
-  pendingVibrationSwaps += 1;
-  if (vibrationReleaseTimer !== null) {
-    window.clearTimeout(vibrationReleaseTimer);
-    vibrationReleaseTimer = null;
-  }
-}
-
-function armVibrationRelease() {
-  if (pendingVibrationSwaps === 0 || vibrationReleaseTimer !== null) return;
-  vibrationReleaseTimer = window.setTimeout(() => {
-    vibrationReleaseTimer = null;
-    const count = pendingVibrationSwaps;
-    pendingVibrationSwaps = 0;
-    vibrateAccumulated(count);
-  }, VIBRATION_IDLE_MS);
+  const level = Math.min(Math.max(step, 1), 6);
+  navigator.vibrate(54 + level * 8);
 }
 
 function cancelPendingVibration() {
-  if (vibrationReleaseTimer !== null) {
-    window.clearTimeout(vibrationReleaseTimer);
-    vibrationReleaseTimer = null;
-  }
-  pendingVibrationSwaps = 0;
   if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
     navigator.vibrate(0);
   }
@@ -129,8 +97,10 @@ function buzzCells(cells: HTMLElement[], step: number) {
     { x: 0, y: 0, scale: 1 },
   ];
 
+  let started = false;
   cells.forEach((cell) => {
     if (!cell.isConnected) return;
+    started = true;
     const wobble: WobbleOffset = { x: 0, y: 0, scale: 1 };
     const wobbles = wobblesByElement.get(cell) ?? new Set<WobbleOffset>();
     wobbles.add(wobble);
@@ -159,6 +129,7 @@ function buzzCells(cells: HTMLElement[], step: number) {
       });
     });
   });
+  if (started) vibrateForWobble(level);
 }
 
 interface BoardProps {
@@ -223,7 +194,6 @@ const Board: React.FC<BoardProps> = ({
   // const invalidSound = useSound("/sounds/invalid.mp3", { volume: 0.4 });
 
   const specialItemType = 4; // Gift box, the fourth board item
-  const successfulSwapsRef = useRef(0);
   const boardElRef = useRef<HTMLDivElement>(null);
   const chainWobbleRef = useRef(0);
   const wobbleFromPlayRef = useRef(false);
@@ -347,7 +317,6 @@ const Board: React.FC<BoardProps> = ({
         setDragStart(null);
         // Enable dragging since no initial matches were found
         setIsFreezing(false);
-        armVibrationRelease();
       }
     }, 300);
     return () => clearTimeout(timer);
@@ -839,7 +808,6 @@ const Board: React.FC<BoardProps> = ({
 
         setTimeout(() => {
           setIsFreezing(false);
-          armVibrationRelease();
         }, 500);
       }, maxNewItemDuration * 1000 * 0.6);
     }
@@ -894,8 +862,6 @@ const Board: React.FC<BoardProps> = ({
     virtualSwapItems(virtualBoard, row1, col1, row2, col2);
     const potentialMatches = findMatches(virtualBoard);
     if (potentialMatches.length > 0) {
-      successfulSwapsRef.current += 1;
-      queueSwapVibration();
       wobbleFromPlayRef.current = true;
       chainWobbleRef.current = 0;
     }
@@ -1066,7 +1032,6 @@ const Board: React.FC<BoardProps> = ({
                   placeholder2.remove();
 
                   setIsFreezing(false);
-                  armVibrationRelease();
                 }, 10);
               },
             });
