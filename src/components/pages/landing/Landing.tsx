@@ -523,16 +523,6 @@ const Landing: React.FC<LandingProps> = ({
           <AppImage src={gameConfig.assets.ui.audioOffButton} alt={t("audioOff")} />
         )}
       </button>
-      <p className={styles.musicCredit}>
-        <a href="https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100365" target="_blank" rel="noreferrer">
-          Up on the Housetop
-        </a>
-        <br />
-        Kevin MacLeod ·{" "}
-        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
-          CC BY 4.0
-        </a>
-      </p>
       {!genericCover && (
         <PrizeDetailsDialog open={prizeOpen} onClose={() => setPrizeOpen(false)} />
       )}
